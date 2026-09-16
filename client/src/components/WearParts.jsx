@@ -45,7 +45,7 @@ export default function WearParts({ car, entries }) {
           <p className="text-xs text-stone-500 mt-0.5">Known weak points for this specific make/model, not routine maintenance.</p>
         </div>
         <button onClick={generate} className="btn-secondary text-xs px-3 py-1.5 shrink-0" disabled={loading}>
-          {loading ? "Asking AI..." : parts.length > 0 ? "Re-generate" : "✨ Generate list"}
+          {loading ? "Calculating..." : parts.length > 0 ? "Re-generate" : "✨ Generate list"}
         </button>
       </div>
 

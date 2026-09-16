@@ -1,66 +1,117 @@
-# CarLogger
+# CARLOGGER
 
-CarLogger is an app for a project car. Use the app to log modifications
-and maintenance. Use the app to get AI estimates of power, performance,
-and lap times. Use the app to track total spend for the car.
+TECHNICAL DESCRIPTION AND OPERATING INSTRUCTIONS
 
-## Technology
+## SAFETY SUMMARY
 
-- Frontend: React, Vite, and Tailwind CSS.
-- Backend: Node.js and Express.
-- Database: SQLite. The app uses the built-in `node:sqlite` module. You
-  do not need to install a separate database.
-- AI: The Google Gemini API. The app uses Gemini for all AI estimates.
+This summary lists each caution in this manual. Read this summary
+before you do any procedure in this manual.
 
-## Requirements
+> **CAUTION**
+>
+> Do not commit the file `server/.env` to git. Do not commit the file
+> `server/data/carlogger.db` to git. Do not commit the folder
+> `server/data/uploads` to git. These files can contain a private API
+> key or private data. Chapter 3 and Chapter 5 give this caution
+> again, at the step it applies to.
 
-- Node.js version 22.5 or later. The app needs this version for the
-  built-in `node:sqlite` module.
-- A Gemini API key. Get a key at https://aistudio.google.com/apikey.
-  You need a key only for the AI features. All other features work
-  without a key.
+## TABLE OF CONTENTS
 
-## Setup
+| Chapter | Title |
+|---|---|
+| 1 | General Description |
+| 2 | Requirements |
+| 3 | Installation Procedure |
+| 4 | Operating Procedure |
+| 5 | Data Storage |
+| 6 | Software Architecture |
+| 7 | Interface Control |
+| 8 | General Notes |
+
+## 1. GENERAL DESCRIPTION
+
+### 1.1 Purpose
+
+CarLogger is an app for a project car. Use the app to log
+modifications and maintenance. Use the app to get AI estimates of
+power, performance, and lap times. Use the app to track total spend
+for the car.
+
+### 1.2 Technology Summary
+
+Table 1-1 lists the technology this software uses.
+
+**Table 1-1. Technology Summary**
+
+| Item | Description |
+|---|---|
+| Frontend | React, Vite, and Tailwind CSS. |
+| Backend | Node.js and Express. |
+| Database | SQLite, through the built-in `node:sqlite` module. A separate database install is not necessary. |
+| AI | The Google Gemini API. The app uses Gemini for all AI estimates. |
+
+## 2. REQUIREMENTS
+
+Table 2-1 lists the requirements for this software.
+
+**Table 2-1. Requirements**
+
+| Item | Requirement |
+|---|---|
+| Node.js | Version 22.5 or later. This version has the built-in `node:sqlite` module. |
+| Gemini API key | Get a key at https://aistudio.google.com/apikey. A key is necessary only for the AI features. All other features work without a key. |
+
+## 3. INSTALLATION PROCEDURE
+
+### 3.1 Setup Procedure
 
 Do these steps to set up the app:
 
 1. Open a terminal in the `carlogger` folder.
 2. Run this command: `npm run install:all`
-3. Run this command to create your environment file:
+3. Run this command to create the environment file:
    `cp server/.env.example server/.env`
 4. Open the file `server/.env`.
 5. Set the value of `GEMINI_API_KEY` to your Gemini API key.
 
-## Run the app
+> **CAUTION**
+>
+> Do not commit the file `server/.env` to git. This file can contain a
+> private API key.
 
-Run this command from the project root to start the API and the
-frontend together:
+## 4. OPERATING PROCEDURE
 
-```bash
-npm run dev
-```
+### 4.1 Start the App — Combined
+
+Do this step to start the API and the frontend together:
+
+1. Run this command from the project root: `npm run dev`
 
 This command starts the API on port 4000. This command also starts
 the frontend on port 5180. Open `http://localhost:5180` in a browser.
 
-The Vite dev server sends all `/api` and `/uploads` requests to the
-Express backend. This happens automatically.
+> **NOTE**
+>
+> The Vite dev server sends all `/api` and `/uploads` requests to the
+> Express backend. This happens automatically.
 
-To start the API and the frontend as separate processes, run these
-commands:
+### 4.2 Start the App — Separate Processes
 
-```bash
-npm run dev:server
-npm run dev:client
-```
+Do these steps to start the API and the frontend as separate
+processes:
 
-## How the app works
+1. Run this command to start the API: `npm run dev:server`
+2. Run this command to start the frontend: `npm run dev:client`
+
+### 4.3 Operating Procedure
+
+Do these steps to operate the app:
 
 1. Add a car. Enter the year, make, and model. Enter an optional
    nickname for the car.
 2. Wait a short time. The app fills in the base horsepower and torque
-   values. The app gets these values from Gemini. You can change these
-   values before you save the car.
+   values. The app gets these values from Gemini. You can change
+   these values before you save the car.
 3. Log a modification for the car. Enter the name, description, cost,
    and install date.
 4. Select "Get AI HP/Torque estimate" for a modification. The app
@@ -80,9 +131,9 @@ npm run dev:client
    estimate of the lap time for that track.
 9. Open the Dyno tab. Get an AI-generated horsepower and torque curve
    for the car.
-10. Open the Maintenance tab. Get an AI-generated maintenance schedule
-    for the car. Get an AI-generated list of common wear parts for the
-    car.
+10. Open the Maintenance tab. Get an AI-generated maintenance
+    schedule for the car. Get an AI-generated list of common wear
+    parts for the car.
 11. Open the Photos tab. Add photos of the car. Add an optional
     caption to each photo.
 12. Open the Dashboard. View the total power gain, the total spend,
@@ -90,13 +141,19 @@ npm run dev:client
     table with data for each car.
 13. Open a car page. View the same data for that one car.
 
-Note: The app corrects spelling and formatting errors in text you
-enter. The app uses Gemini to do this. This applies to entries for
-cars, modifications, maintenance jobs, and tracks.
+> **NOTE**
+>
+> The app corrects spelling and formatting errors in text you enter.
+> The app uses Gemini to do this. This applies to entries for cars,
+> modifications, maintenance jobs, and tracks.
 
-Note: The app works on a phone screen. On a narrow screen, a menu
-button opens the car list. On a narrow screen, a drop-down list
-replaces the row of tabs on a car page.
+> **NOTE**
+>
+> The app works on a phone screen. On a narrow screen, a menu button
+> opens the car list. On a narrow screen, a drop-down list replaces
+> the row of tabs on a car page.
+
+## 5. DATA STORAGE
 
 The app stores all data in a SQLite file. The file is at
 `server/data/carlogger.db`. The app creates this file on the first
@@ -104,7 +161,17 @@ run.
 
 The app stores photo files in the folder `server/data/uploads`.
 
-## Project structure
+> **CAUTION**
+>
+> Do not commit the file `server/data/carlogger.db` to git. Do not
+> commit the folder `server/data/uploads` to git. These files contain
+> private data.
+
+## 6. SOFTWARE ARCHITECTURE
+
+Figure 6-1 shows the folder structure of this software.
+
+**Figure 6-1. Folder Structure**
 
 ```
 carlogger/
@@ -127,7 +194,11 @@ carlogger/
                                   DynoTab, CarPhotos, ...
 ```
 
-## API summary
+## 7. INTERFACE CONTROL
+
+Table 7-1 lists the API endpoints for this software.
+
+**Table 7-1. API Summary**
 
 | Method | Path | Description |
 |---|---|---|
@@ -162,11 +233,10 @@ carlogger/
 | GET | `/api/mod-recommendations?car_id=` | List common mod recommendations for a car. |
 | POST | `/api/mod-recommendations/:carId/generate` | Get an AI-generated list of common mod recommendations for a car. |
 
-## Notes
+## 8. GENERAL NOTES
 
-- If you do not set `GEMINI_API_KEY`, all non-AI features still work.
-  Each AI feature shows a clear error message instead of a result. You
-  can enter horsepower and torque values by hand.
-- The files `.env`, `server/data/carlogger.db`, and
-  `server/data/uploads` are in `.gitignore`. Do not commit these files
-  if you deploy the app.
+> **NOTE**
+>
+> If you do not set `GEMINI_API_KEY`, all non-AI features still work.
+> Each AI feature shows a clear error message instead of a result.
+> You can enter horsepower and torque values by hand.

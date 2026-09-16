@@ -147,7 +147,7 @@ export default function AddCarModal({ onClose, onCreate }) {
           className="btn-secondary w-full text-sm"
           disabled={!canLookup || specsLoading}
         >
-          {specsLoading ? "Asking AI..." : "✨ Look up stock HP/Torque"}
+          {specsLoading ? "Calculating..." : "✨ Look up stock HP/Torque"}
         </button>
 
         <div>

@@ -47,7 +47,7 @@ export default function DynoTab({ carId }) {
             <p className="text-xs text-stone-500 mt-0.5">AI-estimated HP/torque curve for this car's current output.</p>
           </div>
           <button onClick={runEstimate} className="btn-secondary text-xs px-3 py-1.5 shrink-0" disabled={loading}>
-            {loading ? "Asking AI..." : dyno ? "Re-run dyno" : "✨ Run dyno estimate"}
+            {loading ? "Calculating..." : dyno ? "Re-run dyno" : "✨ Run dyno estimate"}
           </button>
         </div>
 
@@ -72,7 +72,7 @@ export default function DynoTab({ carId }) {
         )}
 
         <p className="text-[11px] text-stone-600 mt-4 pt-3 border-t border-stone-800">
-          Simulated by AI — not a real pull, but close enough to argue about at a meet.
+          Simulated by AI — not a real pull, but close enough to argue about at a meet. Don't put your mortgage on it.
         </p>
       </div>
     </div>

@@ -141,7 +141,7 @@ export default function ModsTab({ carId, onChange }) {
                   className="btn-secondary text-xs px-3 py-1.5"
                   disabled={estimatingId === mod.id}
                 >
-                  {estimatingId === mod.id ? "Asking AI..." : "✨ Get AI HP/Torque estimate"}
+                  {estimatingId === mod.id ? "Calculating..." : "✨ Get AI HP/Torque estimate"}
                 </button>
               )}
               {mod.ai_summary && <p className="text-xs text-stone-500 mt-2 italic">{mod.ai_summary}</p>}

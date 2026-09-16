@@ -74,7 +74,7 @@ export default function ModRecommendations({ carId, onModAdded }) {
           <p className="text-xs text-stone-500 mt-0.5">Popular upgrades other owners of this platform install.</p>
         </div>
         <button onClick={generate} className="btn-secondary text-xs px-3 py-1.5 shrink-0" disabled={loading}>
-          {loading ? "Asking AI..." : recs.length > 0 ? "Re-generate" : "✨ Get recommendations"}
+          {loading ? "Calculating..." : recs.length > 0 ? "Re-generate" : "✨ Get recommendations"}
         </button>
       </div>
 

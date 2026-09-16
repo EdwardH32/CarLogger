@@ -54,7 +54,7 @@ export default function MaintenanceIntervals({ car, entries }) {
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-semibold text-stone-300">Recommended service intervals</h3>
         <button onClick={generate} className="btn-secondary text-xs px-3 py-1.5" disabled={loading}>
-          {loading ? "Asking AI..." : intervals.length > 0 ? "Re-generate" : "✨ Generate schedule"}
+          {loading ? "Calculating..." : intervals.length > 0 ? "Re-generate" : "✨ Generate schedule"}
         </button>
       </div>
 

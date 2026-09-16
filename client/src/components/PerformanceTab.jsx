@@ -66,7 +66,7 @@ export default function PerformanceTab({ carId }) {
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-semibold text-stone-300">Estimated performance</h3>
           <button onClick={runPerfEstimate} className="btn-secondary text-xs px-3 py-1.5" disabled={perfLoading}>
-            {perfLoading ? "Asking AI..." : perf ? "Re-estimate" : "✨ Estimate performance"}
+            {perfLoading ? "Calculating..." : perf ? "Re-estimate" : "✨ Estimate performance"}
           </button>
         </div>
 
