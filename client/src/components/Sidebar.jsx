@@ -1,11 +1,31 @@
-export default function Sidebar({ cars, selectedCarId, view, onSelectCar, onSelectDashboard, onAddCar }) {
+export default function Sidebar({
+  cars,
+  selectedCarId,
+  view,
+  onSelectCar,
+  onSelectDashboard,
+  onAddCar,
+  isOpen,
+  onClose,
+}) {
   return (
-    <aside className="w-64 shrink-0 border-r border-stone-800 bg-stone-950/80 flex flex-col h-screen sticky top-0">
-      <div className="p-4 border-b border-stone-800">
+    <aside
+      className={`w-64 shrink-0 border-r border-stone-800 bg-stone-950 md:bg-stone-950/80 flex flex-col h-screen fixed md:sticky top-0 left-0 z-40 transition-transform duration-200 ${
+        isOpen ? "translate-x-0" : "-translate-x-full"
+      } md:translate-x-0`}
+    >
+      <div className="p-4 border-b border-stone-800 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-2xl">🚗</span>
           <span className="text-lg font-bold tracking-tight">CarLogger</span>
         </div>
+        <button
+          onClick={onClose}
+          className="md:hidden text-stone-500 hover:text-stone-300 text-xl leading-none"
+          aria-label="Close menu"
+        >
+          &times;
+        </button>
       </div>
 
       <nav className="p-2">

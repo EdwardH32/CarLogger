@@ -88,4 +88,9 @@ export const api = {
     return res.json();
   },
   deletePhoto: (id) => request(`/photos/${id}`, { method: "DELETE" }),
+
+  // Common mod recommendations
+  getModRecommendations: (carId) => request(`/mod-recommendations?car_id=${carId}`),
+  generateModRecommendations: (carId) =>
+    request(`/mod-recommendations/${carId}/generate`, { method: "POST" }),
 };

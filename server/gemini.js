@@ -100,6 +100,69 @@ Give a realistic, conservative estimate. If the mod wouldn't meaningfully change
   };
 }
 
+async function estimateModRecommendations({ car, existingMods }) {
+  const existingNames = existingMods.map((m) => m.name).join(", ") || "none";
+
+  const prompt = `You are an experienced automotive tuner who specializes in this exact make and
+model. List the most common, popular modifications that real owners of this car install, ordered
+from most to least popular/impactful.
+
+Vehicle: ${car.year} ${car.make} ${car.model}
+Baseline: ${car.base_hp} HP / ${car.base_torque} lb-ft torque
+Mods already logged on this car — do not repeat these: ${existingNames}
+
+For each mod give a realistic typical cost in US dollars, a realistic conservative HP and torque
+gain estimate for THIS specific car, and a short one-sentence reason it's popular on this platform.
+
+Spread the list across a full range of budgets, not just cheap bolt-ons — include some options in
+each of these cost tiers where a realistic mod exists for this platform:
+- Under $1,500 (e.g. intake, exhaust, tune, basic suspension)
+- $1,500–$5,000 (e.g. coilovers, big brake kit, supporting mods)
+- $5,000–$10,000 (e.g. built suspension/drivetrain parts, entry-level forced induction)
+- Over $10,000 (e.g. a full forced-induction kit, built engine, or transmission upgrade), only if
+  something like that realistically exists for this platform
+
+Give 8 to 12 mods total, covering a mix of relevant categories such as intake, exhaust, tune/ECU,
+suspension, brakes, forced induction, and drivetrain.`;
+
+  const schema = {
+    type: "OBJECT",
+    properties: {
+      mods: {
+        type: "ARRAY",
+        items: {
+          type: "OBJECT",
+          properties: {
+            name: { type: "STRING", description: "Mod name, e.g. 'Cold air intake'" },
+            category: {
+              type: "STRING",
+              description: "Category, e.g. Intake, Exhaust, Tune, Suspension, Brakes, Forced Induction, Drivetrain",
+            },
+            estimated_cost: { type: "NUMBER", description: "Typical cost in US dollars" },
+            estimated_hp_gain: { type: "NUMBER", description: "Estimated HP gain, can be 0" },
+            estimated_torque_gain: { type: "NUMBER", description: "Estimated lb-ft torque gain, can be 0" },
+            description: { type: "STRING", description: "One sentence on why it's popular on this platform" },
+          },
+          required: ["name", "category", "estimated_cost", "estimated_hp_gain", "estimated_torque_gain", "description"],
+        },
+      },
+    },
+    required: ["mods"],
+  };
+
+  const parsed = await callGemini(prompt, schema);
+  const mods = Array.isArray(parsed.mods) ? parsed.mods : [];
+
+  return mods.slice(0, 12).map((item) => ({
+    name: String(item.name || "").slice(0, 200),
+    category: String(item.category || "").slice(0, 60),
+    estimated_cost: Number(item.estimated_cost) || 0,
+    estimated_hp_gain: Number(item.estimated_hp_gain) || 0,
+    estimated_torque_gain: Number(item.estimated_torque_gain) || 0,
+    description: String(item.description || "").slice(0, 500),
+  }));
+}
+
 async function estimateStockSpecs({ year, make, model }) {
   const prompt = `You are an automotive database expert. Give the factory-stock horsepower and
 torque for this vehicle as sold from the manufacturer (base/standard trim and engine unless the
@@ -375,6 +438,7 @@ function scaleDynoCurve(stockCurve, car, currentHp, currentTorque) {
 module.exports = {
   cleanupEntryText,
   estimateModGains,
+  estimateModRecommendations,
   estimateStockSpecs,
   estimatePerformance,
   estimateTrackTime,

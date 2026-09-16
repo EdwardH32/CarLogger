@@ -100,6 +100,18 @@ db.exec(`
     caption TEXT,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
+
+  CREATE TABLE IF NOT EXISTS mod_recommendations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    car_id INTEGER NOT NULL REFERENCES cars(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    category TEXT,
+    estimated_cost REAL,
+    estimated_hp_gain REAL,
+    estimated_torque_gain REAL,
+    description TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
 `);
 
 // cars.mileage was added after the initial release — add it if this DB predates it.

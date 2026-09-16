@@ -15,6 +15,7 @@ const maintenanceIntervalsRouter = require("./routes/maintenanceIntervals");
 const wearPartsRouter = require("./routes/wearParts");
 const dynoRouter = require("./routes/dyno");
 const photosRouter = require("./routes/photos");
+const modRecommendationsRouter = require("./routes/modRecommendations");
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -35,6 +36,7 @@ app.use("/api/maintenance-intervals", maintenanceIntervalsRouter);
 app.use("/api/wear-parts", wearPartsRouter);
 app.use("/api/dyno", dynoRouter);
 app.use("/api/photos", photosRouter);
+app.use("/api/mod-recommendations", modRecommendationsRouter);
 
 app.use((err, req, res, next) => {
   console.error(err);

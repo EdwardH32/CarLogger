@@ -12,6 +12,7 @@ export default function App() {
   const [showAddCar, setShowAddCar] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [loadError, setLoadError] = useState("");
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   const loadCars = () =>
     api
@@ -28,6 +29,12 @@ export default function App() {
   const selectCar = (id) => {
     setSelectedCarId(id);
     setView("car");
+    setMobileNavOpen(false);
+  };
+
+  const selectDashboard = () => {
+    setView("dashboard");
+    setMobileNavOpen(false);
   };
 
   const handleCreateCar = async (payload) => {
@@ -44,16 +51,45 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex bg-stone-950">
+      <header className="md:hidden fixed top-0 inset-x-0 z-30 flex items-center justify-between px-4 py-3 border-b border-stone-800 bg-stone-950/95 backdrop-blur">
+        <button
+          onClick={() => setMobileNavOpen(true)}
+          className="text-stone-300 hover:text-stone-100 p-1 -ml-1"
+          aria-label="Open menu"
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path strokeLinecap="round" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+        <span className="text-sm font-bold tracking-tight">🚗 CarLogger</span>
+        <button
+          onClick={() => setShowAddCar(true)}
+          className="text-stone-300 hover:text-stone-100 text-xl leading-none p-1 -mr-1"
+          aria-label="Add car"
+        >
+          +
+        </button>
+      </header>
+
+      {mobileNavOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-30 bg-black/60"
+          onClick={() => setMobileNavOpen(false)}
+        />
+      )}
+
       <Sidebar
         cars={cars}
         selectedCarId={selectedCarId}
         view={view}
         onSelectCar={selectCar}
-        onSelectDashboard={() => setView("dashboard")}
+        onSelectDashboard={selectDashboard}
         onAddCar={() => setShowAddCar(true)}
+        isOpen={mobileNavOpen}
+        onClose={() => setMobileNavOpen(false)}
       />
 
-      <main className="flex-1 p-6 md:p-10 max-w-6xl">
+      <main className="flex-1 p-4 pt-20 md:p-10 md:pt-10 max-w-6xl min-w-0">
         {loadError && <p className="text-rose-400 mb-4">{loadError}</p>}
 
         {view === "dashboard" && <Dashboard refreshKey={refreshKey} onSelectCar={selectCar} />}

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../api.js";
 import StatCard from "./StatCard.jsx";
 import ModsTab from "./ModsTab.jsx";
+import ModRecommendations from "./ModRecommendations.jsx";
 import MaintenanceTab from "./MaintenanceTab.jsx";
 import PerformanceTab from "./PerformanceTab.jsx";
 import DynoTab from "./DynoTab.jsx";
@@ -90,8 +91,8 @@ export default function CarDetail({ carId, onDeleted, notifyChange }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between">
-        <div>
+      <div className="flex items-start justify-between gap-3 flex-wrap">
+        <div className="min-w-0">
           {editingNickname ? (
             <form onSubmit={saveNickname} className="flex items-center gap-1.5">
               <input
@@ -159,7 +160,7 @@ export default function CarDetail({ carId, onDeleted, notifyChange }) {
             )}
           </div>
         </div>
-        <button onClick={deleteCar} className="btn-danger text-sm">
+        <button onClick={deleteCar} className="btn-danger text-sm shrink-0">
           Delete car
         </button>
       </div>
@@ -171,27 +172,65 @@ export default function CarDetail({ carId, onDeleted, notifyChange }) {
         <StatCard label="Cost per HP" value={summary.cost_per_hp != null ? money(summary.cost_per_hp) : "—"} />
       </div>
 
-      <div className="flex gap-2 border-b border-stone-800">
-        {[
-          { id: "mods", label: `Mods (${summary.mod_count})` },
-          { id: "maintenance", label: `Maintenance (${summary.maintenance_count})` },
-          { id: "performance", label: "Performance" },
-          { id: "dyno", label: "Dyno" },
-          { id: "photos", label: "Photos" },
-        ].map((t) => (
-          <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
-            className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
-              tab === t.id ? "border-brand-500 text-brand-400" : "border-transparent text-stone-500 hover:text-stone-300"
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
+      {(() => {
+        const tabs = [
+          { id: "mods", icon: "🔧", label: `Mods (${summary.mod_count})` },
+          { id: "recommendations", icon: "💡", label: "Recommendations" },
+          { id: "maintenance", icon: "🛠️", label: `Maintenance (${summary.maintenance_count})` },
+          { id: "performance", icon: "🏁", label: "Performance" },
+          { id: "dyno", icon: "📈", label: "Dyno" },
+          { id: "photos", icon: "📷", label: "Photos" },
+        ];
+
+        return (
+          <>
+            <div className="relative md:hidden">
+              <select
+                value={tab}
+                onChange={(e) => setTab(e.target.value)}
+                className="w-full appearance-none rounded-xl bg-stone-900 border border-stone-800 pl-4 pr-10 py-3 text-base font-semibold text-stone-100 focus:outline-none focus:ring-2 focus:ring-brand-600 focus:border-transparent"
+                aria-label="Select section"
+              >
+                {tabs.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.icon} {t.label}
+                  </option>
+                ))}
+              </select>
+              <svg
+                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-stone-500"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="m6 9 6 6 6-6" />
+              </svg>
+            </div>
+
+            <div className="hidden md:flex gap-2 border-b border-stone-800">
+              {tabs.map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => setTab(t.id)}
+                  className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors shrink-0 whitespace-nowrap ${
+                    tab === t.id
+                      ? "border-brand-500 text-brand-400"
+                      : "border-transparent text-stone-500 hover:text-stone-300"
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </>
+        );
+      })()}
 
       {tab === "mods" && <ModsTab carId={car.id} onChange={handleChange} />}
+      {tab === "recommendations" && <ModRecommendations carId={car.id} onModAdded={handleChange} />}
       {tab === "maintenance" && <MaintenanceTab car={car} onChange={handleChange} />}
       {tab === "performance" && <PerformanceTab carId={car.id} />}
       {tab === "dyno" && <DynoTab carId={car.id} />}
