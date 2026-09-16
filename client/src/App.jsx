@@ -43,7 +43,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex bg-slate-950">
+    <div className="min-h-screen flex bg-stone-950">
       <Sidebar
         cars={cars}
         selectedCarId={selectedCarId}

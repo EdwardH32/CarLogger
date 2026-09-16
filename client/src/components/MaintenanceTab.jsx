@@ -60,7 +60,7 @@ export default function MaintenanceTab({ car, onChange }) {
       <WearParts car={car} entries={entries} />
 
       <form onSubmit={submit} className="card p-4 space-y-3">
-        <h3 className="text-sm font-semibold text-slate-300">Log maintenance</h3>
+        <h3 className="text-sm font-semibold text-stone-300">Log maintenance</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
             <label className="label">Service</label>
@@ -100,13 +100,13 @@ export default function MaintenanceTab({ car, onChange }) {
       </form>
 
       <div className="space-y-3">
-        {entries.length === 0 && <p className="text-sm text-slate-500">No maintenance logged yet.</p>}
+        {entries.length === 0 && <p className="text-sm text-stone-500">No maintenance logged yet.</p>}
         {entries.map((entry) => (
           <div key={entry.id} className="card p-4 flex items-start justify-between gap-4">
             <div className="min-w-0">
-              <h4 className="font-semibold text-slate-100">{entry.service}</h4>
-              {entry.description && <p className="text-sm text-slate-400 mt-1">{entry.description}</p>}
-              <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-slate-500">
+              <h4 className="font-semibold text-stone-100">{entry.service}</h4>
+              {entry.description && <p className="text-sm text-stone-400 mt-1">{entry.description}</p>}
+              <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-stone-500">
                 <span>{money(entry.cost)}</span>
                 {entry.service_date && <span>{entry.service_date}</span>}
                 {entry.mileage != null && <span>{entry.mileage.toLocaleString()} mi</span>}

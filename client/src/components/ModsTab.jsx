@@ -69,7 +69,7 @@ export default function ModsTab({ carId, onChange }) {
   return (
     <div className="space-y-6">
       <form onSubmit={submit} className="card p-4 space-y-3">
-        <h3 className="text-sm font-semibold text-slate-300">Log a new mod</h3>
+        <h3 className="text-sm font-semibold text-stone-300">Log a new mod</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
             <label className="label">Mod name</label>
@@ -105,14 +105,14 @@ export default function ModsTab({ carId, onChange }) {
       </form>
 
       <div className="space-y-3">
-        {mods.length === 0 && <p className="text-sm text-slate-500">No mods logged yet.</p>}
+        {mods.length === 0 && <p className="text-sm text-stone-500">No mods logged yet.</p>}
         {mods.map((mod) => (
           <div key={mod.id} className="card p-4">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
-                <h4 className="font-semibold text-slate-100">{mod.name}</h4>
-                {mod.description && <p className="text-sm text-slate-400 mt-1">{mod.description}</p>}
-                <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-slate-500">
+                <h4 className="font-semibold text-stone-100">{mod.name}</h4>
+                {mod.description && <p className="text-sm text-stone-400 mt-1">{mod.description}</p>}
+                <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-stone-500">
                   <span>{money(mod.cost)}</span>
                   {mod.install_date && <span>Installed {mod.install_date}</span>}
                 </div>
@@ -122,7 +122,7 @@ export default function ModsTab({ carId, onChange }) {
               </button>
             </div>
 
-            <div className="mt-3 pt-3 border-t border-slate-800">
+            <div className="mt-3 pt-3 border-t border-stone-800">
               {mod.estimated_hp_gain != null ? (
                 <div className="flex flex-wrap items-center gap-4">
                   <span className="text-emerald-400 font-semibold text-sm">+{mod.estimated_hp_gain.toFixed(0)} HP</span>
@@ -141,10 +141,10 @@ export default function ModsTab({ carId, onChange }) {
                   className="btn-secondary text-xs px-3 py-1.5"
                   disabled={estimatingId === mod.id}
                 >
-                  {estimatingId === mod.id ? "Asking Deepseek..." : "✨ Get AI HP/Torque estimate"}
+                  {estimatingId === mod.id ? "Asking AI..." : "✨ Get AI HP/Torque estimate"}
                 </button>
               )}
-              {mod.ai_summary && <p className="text-xs text-slate-500 mt-2 italic">{mod.ai_summary}</p>}
+              {mod.ai_summary && <p className="text-xs text-stone-500 mt-2 italic">{mod.ai_summary}</p>}
               {estimateError[mod.id] && <p className="text-xs text-rose-400 mt-2">{estimateError[mod.id]}</p>}
             </div>
           </div>

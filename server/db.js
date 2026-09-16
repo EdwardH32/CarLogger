@@ -16,6 +16,7 @@ db.exec(`
     year INTEGER NOT NULL,
     make TEXT NOT NULL,
     model TEXT NOT NULL,
+    nickname TEXT,
     base_hp REAL NOT NULL,
     base_torque REAL NOT NULL,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -91,12 +92,23 @@ db.exec(`
     summary TEXT,
     updated_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
+
+  CREATE TABLE IF NOT EXISTS car_photos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    car_id INTEGER NOT NULL REFERENCES cars(id) ON DELETE CASCADE,
+    filename TEXT NOT NULL,
+    caption TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
 `);
 
 // cars.mileage was added after the initial release — add it if this DB predates it.
 const carColumns = db.prepare("PRAGMA table_info(cars)").all().map((c) => c.name);
 if (!carColumns.includes("mileage")) {
   db.exec("ALTER TABLE cars ADD COLUMN mileage INTEGER");
+}
+if (!carColumns.includes("nickname")) {
+  db.exec("ALTER TABLE cars ADD COLUMN nickname TEXT");
 }
 
 module.exports = db;

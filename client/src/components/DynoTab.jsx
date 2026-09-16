@@ -43,11 +43,11 @@ export default function DynoTab({ carId }) {
       <div className="card p-4">
         <div className="flex items-center justify-between mb-3">
           <div>
-            <h3 className="text-sm font-semibold text-slate-300">Dyno graph</h3>
-            <p className="text-xs text-slate-500 mt-0.5">AI-estimated HP/torque curve for this car's current output.</p>
+            <h3 className="text-sm font-semibold text-stone-300">Dyno graph</h3>
+            <p className="text-xs text-stone-500 mt-0.5">AI-estimated HP/torque curve for this car's current output.</p>
           </div>
           <button onClick={runEstimate} className="btn-secondary text-xs px-3 py-1.5 shrink-0" disabled={loading}>
-            {loading ? "Asking Gemini..." : dyno ? "Re-run dyno" : "✨ Run dyno estimate"}
+            {loading ? "Asking AI..." : dyno ? "Re-run dyno" : "✨ Run dyno estimate"}
           </button>
         </div>
 
@@ -60,16 +60,20 @@ export default function DynoTab({ carId }) {
               <StatCard label="Peak Torque" value={`${peakTorque.toFixed(0)} lb-ft`} accent="text-blue-400" />
               <StatCard label="Redline" value={dyno.redline_rpm ? `${dyno.redline_rpm.toLocaleString()} RPM` : "—"} />
             </div>
-            <div className="bg-slate-950 rounded-xl border border-slate-800 p-2">
+            <div className="bg-stone-950 rounded-xl border border-stone-800 p-2">
               <DynoChart points={dyno.points} redlineRpm={dyno.redline_rpm} />
             </div>
-            {dyno.summary && <p className="text-xs text-slate-500 mt-3 italic">{dyno.summary}</p>}
+            {dyno.summary && <p className="text-xs text-stone-500 mt-3 italic">{dyno.summary}</p>}
           </>
         ) : (
           loaded && !loading && !error && (
-            <p className="text-sm text-slate-500">No dyno graph generated yet.</p>
+            <p className="text-sm text-stone-500">No dyno graph generated yet.</p>
           )
         )}
+
+        <p className="text-[11px] text-stone-600 mt-4 pt-3 border-t border-stone-800">
+          Simulated by AI — not a real pull, but close enough to argue about at a meet.
+        </p>
       </div>
     </div>
   );

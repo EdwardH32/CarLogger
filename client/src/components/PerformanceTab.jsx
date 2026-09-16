@@ -64,9 +64,9 @@ export default function PerformanceTab({ carId }) {
     <div className="space-y-6">
       <div className="card p-4">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-slate-300">Estimated performance</h3>
+          <h3 className="text-sm font-semibold text-stone-300">Estimated performance</h3>
           <button onClick={runPerfEstimate} className="btn-secondary text-xs px-3 py-1.5" disabled={perfLoading}>
-            {perfLoading ? "Asking Gemini..." : perf ? "Re-estimate" : "✨ Estimate performance"}
+            {perfLoading ? "Asking AI..." : perf ? "Re-estimate" : "✨ Estimate performance"}
           </button>
         </div>
 
@@ -76,17 +76,17 @@ export default function PerformanceTab({ carId }) {
           <StatCard label="Nordschleife" value={perf?.nordschleife_time || "—"} sub="Nürburgring lap time" />
         </div>
 
-        {perf?.summary && <p className="text-xs text-slate-500 mt-3 italic">{perf.summary}</p>}
+        {perf?.summary && <p className="text-xs text-stone-500 mt-3 italic">{perf.summary}</p>}
         {perfError && <p className="text-xs text-rose-400 mt-3">{perfError}</p>}
         {!perf && !perfError && !perfLoading && (
-          <p className="text-xs text-slate-500 mt-3">
+          <p className="text-xs text-stone-500 mt-3">
             Estimates use this car's current output (baseline + logged mod gains).
           </p>
         )}
       </div>
 
       <div className="card p-4">
-        <h3 className="text-sm font-semibold text-slate-300 mb-3">Track lap times</h3>
+        <h3 className="text-sm font-semibold text-stone-300 mb-3">Track lap times</h3>
 
         <form onSubmit={addTrack} className="flex flex-col sm:flex-row gap-2 mb-4">
           <input
@@ -103,17 +103,17 @@ export default function PerformanceTab({ carId }) {
         {trackError && <p className="text-xs text-rose-400 -mt-2 mb-3">{trackError}</p>}
 
         {tracks.length === 0 ? (
-          <p className="text-sm text-slate-500">No tracks added yet.</p>
+          <p className="text-sm text-stone-500">No tracks added yet.</p>
         ) : (
           <div className="space-y-3">
             {tracks.map((track) => (
-              <div key={track.id} className="flex items-start justify-between gap-4 border-t border-slate-800 pt-3 first:border-t-0 first:pt-0">
+              <div key={track.id} className="flex items-start justify-between gap-4 border-t border-stone-800 pt-3 first:border-t-0 first:pt-0">
                 <div className="min-w-0">
                   <div className="flex items-baseline gap-2">
-                    <h4 className="font-semibold text-slate-100">{track.track_name}</h4>
+                    <h4 className="font-semibold text-stone-100">{track.track_name}</h4>
                     <span className="text-emerald-400 font-semibold text-sm">{track.lap_time}</span>
                   </div>
-                  {track.summary && <p className="text-xs text-slate-500 mt-1 italic">{track.summary}</p>}
+                  {track.summary && <p className="text-xs text-stone-500 mt-1 italic">{track.summary}</p>}
                 </div>
                 <button onClick={() => removeTrack(track.id)} className="btn-danger px-2 py-1 text-xs shrink-0">
                   Delete

@@ -16,7 +16,7 @@ export default function Dashboard({ refreshKey, onSelectCar }) {
   }, [refreshKey]);
 
   if (error) return <p className="text-rose-400">{error}</p>;
-  if (!data) return <p className="text-slate-500">Loading...</p>;
+  if (!data) return <p className="text-stone-500">Loading...</p>;
 
   const { totals, cars } = data;
 
@@ -24,7 +24,7 @@ export default function Dashboard({ refreshKey, onSelectCar }) {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="text-slate-500 text-sm mt-1">Across {totals.car_count} car{totals.car_count === 1 ? "" : "s"} in your garage</p>
+        <p className="text-stone-500 text-sm mt-1">Across {totals.car_count} car{totals.car_count === 1 ? "" : "s"} in your garage</p>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -39,14 +39,14 @@ export default function Dashboard({ refreshKey, onSelectCar }) {
       </div>
 
       <div className="card p-4">
-        <h2 className="text-sm font-semibold text-slate-300 mb-3">Garage breakdown</h2>
+        <h2 className="text-sm font-semibold text-stone-300 mb-3">Garage breakdown</h2>
         {cars.length === 0 ? (
-          <p className="text-sm text-slate-500">Add a car to get started.</p>
+          <p className="text-sm text-stone-500">Add a car to get started.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-slate-500 border-b border-slate-800">
+                <tr className="text-left text-stone-500 border-b border-stone-800">
                   <th className="py-2 pr-4 font-medium">Car</th>
                   <th className="py-2 pr-4 font-medium">HP Gain</th>
                   <th className="py-2 pr-4 font-medium">Torque Gain</th>
@@ -59,10 +59,17 @@ export default function Dashboard({ refreshKey, onSelectCar }) {
                   <tr
                     key={car.id}
                     onClick={() => onSelectCar(car.id)}
-                    className="border-b border-slate-900 hover:bg-slate-900/60 cursor-pointer"
+                    className="border-b border-stone-900 hover:bg-stone-900/60 cursor-pointer"
                   >
-                    <td className="py-2 pr-4 font-medium text-slate-200">
-                      {car.year} {car.make} {car.model}
+                    <td className="py-2 pr-4 font-medium text-stone-200">
+                      {car.nickname ? (
+                        <>
+                          {car.nickname}
+                          <span className="text-stone-500 font-normal"> · {car.year} {car.make} {car.model}</span>
+                        </>
+                      ) : (
+                        `${car.year} ${car.make} ${car.model}`
+                      )}
                     </td>
                     <td className="py-2 pr-4 text-emerald-400">+{summary.total_hp_gain.toFixed(0)} HP</td>
                     <td className="py-2 pr-4 text-emerald-400">+{summary.total_torque_gain.toFixed(0)} lb-ft</td>

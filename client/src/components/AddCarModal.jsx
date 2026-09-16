@@ -3,7 +3,15 @@ import Modal from "./Modal.jsx";
 import { api } from "../api.js";
 
 export default function AddCarModal({ onClose, onCreate }) {
-  const [form, setForm] = useState({ year: "", make: "", model: "", base_hp: "", base_torque: "", mileage: "" });
+  const [form, setForm] = useState({
+    year: "",
+    make: "",
+    model: "",
+    nickname: "",
+    base_hp: "",
+    base_torque: "",
+    mileage: "",
+  });
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -63,6 +71,7 @@ export default function AddCarModal({ onClose, onCreate }) {
         year: Number(form.year),
         make: form.make.trim(),
         model: form.model.trim(),
+        nickname: form.nickname.trim(),
         base_hp: Number(form.base_hp),
         base_torque: Number(form.base_torque),
         mileage: Number(form.mileage),
@@ -112,6 +121,15 @@ export default function AddCarModal({ onClose, onCreate }) {
           />
         </div>
         <div>
+          <label className="label">Nickname (optional)</label>
+          <input
+            className="input"
+            value={form.nickname}
+            onChange={update("nickname")}
+            placeholder="The Beast"
+          />
+        </div>
+        <div>
           <label className="label">Current mileage</label>
           <input
             className="input"
@@ -120,7 +138,7 @@ export default function AddCarModal({ onClose, onCreate }) {
             onChange={update("mileage")}
             placeholder="42000"
           />
-          <p className="text-xs text-slate-500 mt-1">Used to work out recommended maintenance intervals.</p>
+          <p className="text-xs text-stone-500 mt-1">Used to work out recommended maintenance intervals.</p>
         </div>
 
         <button
@@ -129,11 +147,11 @@ export default function AddCarModal({ onClose, onCreate }) {
           className="btn-secondary w-full text-sm"
           disabled={!canLookup || specsLoading}
         >
-          {specsLoading ? "Asking Gemini..." : "✨ Look up stock HP/Torque"}
+          {specsLoading ? "Asking AI..." : "✨ Look up stock HP/Torque"}
         </button>
 
         <div>
-          <span className="text-xs font-medium text-slate-400 mb-1 block">Base HP / Torque</span>
+          <span className="text-xs font-medium text-stone-400 mb-1 block">Base HP / Torque</span>
           <div className="grid grid-cols-2 gap-3">
             <input
               className="input"
@@ -150,11 +168,11 @@ export default function AddCarModal({ onClose, onCreate }) {
               placeholder="290"
             />
           </div>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-stone-500 mt-1">
             Fill in year, make, and model, then press Enter or the button above to look up stock
             specs — or just type them in yourself.
           </p>
-          {specsNote && !specsError && <p className="text-xs text-slate-500 mt-1 italic">{specsNote}</p>}
+          {specsNote && !specsError && <p className="text-xs text-stone-500 mt-1 italic">{specsNote}</p>}
           {specsError && <p className="text-xs text-amber-400 mt-1">Lookup failed ({specsError}).</p>}
         </div>
 

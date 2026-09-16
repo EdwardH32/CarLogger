@@ -1,6 +1,6 @@
 const express = require("express");
 const db = require("../db");
-const { estimateModGains } = require("../gemini");
+const { estimateModGains, cleanupEntryText } = require("../gemini");
 
 const router = express.Router();
 
@@ -12,7 +12,7 @@ router.get("/", (req, res) => {
   res.json(mods);
 });
 
-router.post("/", (req, res) => {
+router.post("/", async (req, res) => {
   const { car_id, name, description, cost, install_date } = req.body;
 
   if (!car_id || !name) {
@@ -22,10 +22,12 @@ router.post("/", (req, res) => {
   const car = db.prepare("SELECT * FROM cars WHERE id = ?").get(car_id);
   if (!car) return res.status(404).json({ error: "Car not found" });
 
+  const cleaned = await cleanupEntryText({ name, description });
+
   const stmt = db.prepare(
     "INSERT INTO mods (car_id, name, description, cost, install_date) VALUES (?, ?, ?, ?, ?)"
   );
-  const info = stmt.run(car_id, name, description || null, cost || 0, install_date || null);
+  const info = stmt.run(car_id, cleaned.name, cleaned.description || null, cost || 0, install_date || null);
   const mod = db.prepare("SELECT * FROM mods WHERE id = ?").get(info.lastInsertRowid);
   res.status(201).json(mod);
 });

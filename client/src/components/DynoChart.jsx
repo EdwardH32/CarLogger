@@ -38,7 +38,7 @@ export default function DynoChart({ points, redlineRpm }) {
           x2={WIDTH - PAD.right}
           y1={PAD.top + PLOT_H * (1 - f)}
           y2={PAD.top + PLOT_H * (1 - f)}
-          stroke="#1e293b"
+          stroke="#292524"
           strokeWidth="1"
         />
       ))}
@@ -50,12 +50,12 @@ export default function DynoChart({ points, redlineRpm }) {
           y={HEIGHT - PAD.bottom + 18}
           textAnchor="middle"
           fontSize="10"
-          fill="#64748b"
+          fill="#78716c"
         >
           {(p.rpm / 1000).toFixed(1)}k
         </text>
       ))}
-      <text x={WIDTH / 2} y={HEIGHT - 4} textAnchor="middle" fontSize="10" fill="#475569">
+      <text x={WIDTH / 2} y={HEIGHT - 4} textAnchor="middle" fontSize="10" fill="#57534e">
         RPM
       </text>
 

@@ -22,14 +22,52 @@ async function callGemini(prompt, responseSchema) {
 
   if (!response.ok) {
     const body = await response.text().catch(() => "");
-    throw new Error(`Gemini API error (${response.status}): ${body.slice(0, 300)}`);
+    throw new Error(`AI service error (${response.status}): ${body.slice(0, 300)}`);
   }
 
   const data = await response.json();
   const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) throw new Error("Gemini response had no content");
+  if (!text) throw new Error("AI response had no content");
 
   return JSON.parse(text);
+}
+
+// Fixes spelling, capitalization, and formatting on free-text fields the user typed (car
+// make/model, mod name/description, maintenance service/description). Falls back to the raw
+// input untouched if Gemini isn't configured or the call fails, so saving never breaks.
+async function cleanupEntryText(fields) {
+  const entries = Object.entries(fields).filter(([, v]) => typeof v === "string" && v.trim() !== "");
+  if (entries.length === 0) return fields;
+
+  const schema = {
+    type: "OBJECT",
+    properties: Object.fromEntries(
+      entries.map(([key]) => [key, { type: "STRING", description: `Corrected text for "${key}"` }])
+    ),
+    required: entries.map(([key]) => key),
+  };
+
+  const prompt = `You are a copy editor for a car-modification logging app. Fix spelling mistakes,
+correct capitalization, and clean up spacing/punctuation for each field below. Preserve the
+original meaning, technical terms, brand names, and part numbers exactly — only fix genuine typos
+and formatting issues. Keep each field about the same length; don't add information or reword
+anything that's already correct. If a field is already correct, return it unchanged.
+
+${entries.map(([key, value]) => `${key}: "${value}"`).join("\n")}`;
+
+  try {
+    const parsed = await callGemini(prompt, schema);
+    const result = { ...fields };
+    for (const [key] of entries) {
+      if (typeof parsed[key] === "string" && parsed[key].trim()) {
+        result[key] = parsed[key].trim();
+      }
+    }
+    return result;
+  } catch (err) {
+    console.error("Gemini text cleanup failed, keeping raw input:", err.message);
+    return fields;
+  }
 }
 
 async function estimateModGains({ car, mod }) {
@@ -331,17 +369,11 @@ function scaleDynoCurve(stockCurve, car, currentHp, currentTorque) {
     torque: Math.round(p.torque * torqueScale * 10) / 10,
   }));
 
-  let summary = stockCurve.summary;
-  if (Math.abs(hpScale - 1) > 0.01 || Math.abs(torqueScale - 1) > 0.01) {
-    const peakHp = Math.max(...points.map((p) => p.hp));
-    const peakTorque = Math.max(...points.map((p) => p.torque));
-    summary += ` That's the stock curve — scaled ${hpScale.toFixed(2)}× HP / ${torqueScale.toFixed(2)}× torque for the mods logged on this car, this curve peaks at ${peakHp.toFixed(0)} HP / ${peakTorque.toFixed(0)} lb-ft.`;
-  }
-
-  return { redline_rpm: stockCurve.redline_rpm, points, summary: summary.slice(0, 1200) };
+  return { redline_rpm: stockCurve.redline_rpm, points, summary: stockCurve.summary.slice(0, 1200) };
 }
 
 module.exports = {
+  cleanupEntryText,
   estimateModGains,
   estimateStockSpecs,
   estimatePerformance,

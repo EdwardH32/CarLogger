@@ -5,6 +5,7 @@ import ModsTab from "./ModsTab.jsx";
 import MaintenanceTab from "./MaintenanceTab.jsx";
 import PerformanceTab from "./PerformanceTab.jsx";
 import DynoTab from "./DynoTab.jsx";
+import CarPhotos from "./CarPhotos.jsx";
 
 const money = (n) => `$${Number(n || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
 
@@ -17,6 +18,10 @@ export default function CarDetail({ carId, onDeleted, notifyChange }) {
   const [mileageInput, setMileageInput] = useState("");
   const [mileageSaving, setMileageSaving] = useState(false);
 
+  const [editingNickname, setEditingNickname] = useState(false);
+  const [nicknameInput, setNicknameInput] = useState("");
+  const [nicknameSaving, setNicknameSaving] = useState(false);
+
   const loadSummary = () =>
     api
       .getCarSummary(carId)
@@ -27,6 +32,7 @@ export default function CarDetail({ carId, onDeleted, notifyChange }) {
     setData(null);
     setTab("mods");
     setEditingMileage(false);
+    setEditingNickname(false);
     loadSummary();
   }, [carId]);
 
@@ -59,8 +65,26 @@ export default function CarDetail({ carId, onDeleted, notifyChange }) {
     }
   };
 
+  const startEditNickname = () => {
+    setNicknameInput(data?.car.nickname || "");
+    setEditingNickname(true);
+  };
+
+  const saveNickname = async (e) => {
+    e.preventDefault();
+    setNicknameSaving(true);
+    try {
+      await api.updateCar(carId, { nickname: nicknameInput.trim() });
+      setEditingNickname(false);
+      loadSummary();
+      notifyChange?.();
+    } finally {
+      setNicknameSaving(false);
+    }
+  };
+
   if (error) return <p className="text-rose-400">{error}</p>;
-  if (!data) return <p className="text-slate-500">Loading...</p>;
+  if (!data) return <p className="text-stone-500">Loading...</p>;
 
   const { car, summary } = data;
 
@@ -68,14 +92,44 @@ export default function CarDetail({ carId, onDeleted, notifyChange }) {
     <div className="space-y-6">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold">
-            {car.year} {car.make} {car.model}
-          </h1>
+          {editingNickname ? (
+            <form onSubmit={saveNickname} className="flex items-center gap-1.5">
+              <input
+                className="input py-1 px-2 text-lg font-bold w-56"
+                autoFocus
+                value={nicknameInput}
+                onChange={(e) => setNicknameInput(e.target.value)}
+                placeholder="Nickname"
+              />
+              <button type="submit" className="text-brand-400 hover:text-brand-300 text-xs" disabled={nicknameSaving}>
+                {nicknameSaving ? "..." : "Save"}
+              </button>
+              <button
+                type="button"
+                className="text-stone-500 hover:text-stone-300 text-xs"
+                onClick={() => setEditingNickname(false)}
+              >
+                Cancel
+              </button>
+            </form>
+          ) : (
+            <button onClick={startEditNickname} className="group flex items-center gap-2">
+              <h1 className="text-2xl font-bold">{car.nickname || `${car.year} ${car.make} ${car.model}`}</h1>
+              <span className="text-xs text-stone-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                {car.nickname ? "edit" : "+ nickname"}
+              </span>
+            </button>
+          )}
+          {car.nickname && (
+            <p className="text-sm text-stone-500 mt-0.5">
+              {car.year} {car.make} {car.model}
+            </p>
+          )}
           <div className="flex items-center gap-2 text-sm mt-1">
-            <p className="text-slate-500">
+            <p className="text-stone-500">
               Baseline: {car.base_hp} HP / {car.base_torque} lb-ft
             </p>
-            <span className="text-slate-700">·</span>
+            <span className="text-stone-700">·</span>
             {editingMileage ? (
               <form onSubmit={saveMileage} className="flex items-center gap-1.5">
                 <input
@@ -86,20 +140,20 @@ export default function CarDetail({ carId, onDeleted, notifyChange }) {
                   onChange={(e) => setMileageInput(e.target.value)}
                   placeholder="mileage"
                 />
-                <span className="text-slate-500">mi</span>
+                <span className="text-stone-500">mi</span>
                 <button type="submit" className="text-brand-400 hover:text-brand-300 text-xs" disabled={mileageSaving}>
                   {mileageSaving ? "..." : "Save"}
                 </button>
                 <button
                   type="button"
-                  className="text-slate-500 hover:text-slate-300 text-xs"
+                  className="text-stone-500 hover:text-stone-300 text-xs"
                   onClick={() => setEditingMileage(false)}
                 >
                   Cancel
                 </button>
               </form>
             ) : (
-              <button onClick={startEditMileage} className="text-slate-500 hover:text-slate-300 underline decoration-dotted">
+              <button onClick={startEditMileage} className="text-stone-500 hover:text-stone-300 underline decoration-dotted">
                 {car.mileage != null ? `${car.mileage.toLocaleString()} mi` : "Set mileage"}
               </button>
             )}
@@ -117,18 +171,19 @@ export default function CarDetail({ carId, onDeleted, notifyChange }) {
         <StatCard label="Cost per HP" value={summary.cost_per_hp != null ? money(summary.cost_per_hp) : "—"} />
       </div>
 
-      <div className="flex gap-2 border-b border-slate-800">
+      <div className="flex gap-2 border-b border-stone-800">
         {[
           { id: "mods", label: `Mods (${summary.mod_count})` },
           { id: "maintenance", label: `Maintenance (${summary.maintenance_count})` },
           { id: "performance", label: "Performance" },
           { id: "dyno", label: "Dyno" },
+          { id: "photos", label: "Photos" },
         ].map((t) => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
             className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
-              tab === t.id ? "border-brand-500 text-brand-400" : "border-transparent text-slate-500 hover:text-slate-300"
+              tab === t.id ? "border-brand-500 text-brand-400" : "border-transparent text-stone-500 hover:text-stone-300"
             }`}
           >
             {t.label}
@@ -140,6 +195,7 @@ export default function CarDetail({ carId, onDeleted, notifyChange }) {
       {tab === "maintenance" && <MaintenanceTab car={car} onChange={handleChange} />}
       {tab === "performance" && <PerformanceTab carId={car.id} />}
       {tab === "dyno" && <DynoTab carId={car.id} />}
+      {tab === "photos" && <CarPhotos carId={car.id} />}
     </div>
   );
 }

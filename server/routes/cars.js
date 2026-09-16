@@ -1,6 +1,6 @@
 const express = require("express");
 const db = require("../db");
-const { estimateStockSpecs } = require("../gemini");
+const { estimateStockSpecs, cleanupEntryText } = require("../gemini");
 
 const router = express.Router();
 
@@ -31,17 +31,27 @@ router.get("/:id", (req, res) => {
   res.json(car);
 });
 
-router.post("/", (req, res) => {
-  const { year, make, model, base_hp, base_torque, mileage } = req.body;
+router.post("/", async (req, res) => {
+  const { year, make, model, nickname, base_hp, base_torque, mileage } = req.body;
 
   if (!year || !make || !model || base_hp == null || base_torque == null || mileage == null) {
     return res.status(400).json({ error: "year, make, model, base_hp, base_torque, and mileage are required" });
   }
 
+  const cleaned = await cleanupEntryText({ make, model, nickname });
+
   const stmt = db.prepare(
-    "INSERT INTO cars (year, make, model, base_hp, base_torque, mileage) VALUES (?, ?, ?, ?, ?, ?)"
+    "INSERT INTO cars (year, make, model, nickname, base_hp, base_torque, mileage) VALUES (?, ?, ?, ?, ?, ?, ?)"
   );
-  const info = stmt.run(year, make, model, base_hp, base_torque, mileage);
+  const info = stmt.run(
+    year,
+    cleaned.make,
+    cleaned.model,
+    cleaned.nickname || null,
+    base_hp,
+    base_torque,
+    mileage
+  );
   const car = db.prepare("SELECT * FROM cars WHERE id = ?").get(info.lastInsertRowid);
   res.status(201).json(car);
 });
@@ -50,13 +60,14 @@ router.put("/:id", (req, res) => {
   const existing = db.prepare("SELECT * FROM cars WHERE id = ?").get(req.params.id);
   if (!existing) return res.status(404).json({ error: "Car not found" });
 
-  const { year, make, model, base_hp, base_torque, mileage } = req.body;
+  const { year, make, model, nickname, base_hp, base_torque, mileage } = req.body;
   db.prepare(
-    "UPDATE cars SET year = ?, make = ?, model = ?, base_hp = ?, base_torque = ?, mileage = ? WHERE id = ?"
+    "UPDATE cars SET year = ?, make = ?, model = ?, nickname = ?, base_hp = ?, base_torque = ?, mileage = ? WHERE id = ?"
   ).run(
     year ?? existing.year,
     make ?? existing.make,
     model ?? existing.model,
+    nickname !== undefined ? nickname || null : existing.nickname,
     base_hp ?? existing.base_hp,
     base_torque ?? existing.base_torque,
     mileage ?? existing.mileage,

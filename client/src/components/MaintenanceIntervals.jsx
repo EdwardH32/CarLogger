@@ -14,7 +14,7 @@ function getStatus(interval, car, lastService) {
 }
 
 const TONE_CLASSES = {
-  neutral: "bg-slate-800 text-slate-400",
+  neutral: "bg-stone-800 text-stone-400",
   ok: "bg-emerald-950 text-emerald-400",
   warn: "bg-amber-950 text-amber-400",
   danger: "bg-rose-950 text-rose-400",
@@ -52,9 +52,9 @@ export default function MaintenanceIntervals({ car, entries }) {
   return (
     <div className="card p-4">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-slate-300">Recommended service intervals</h3>
+        <h3 className="text-sm font-semibold text-stone-300">Recommended service intervals</h3>
         <button onClick={generate} className="btn-secondary text-xs px-3 py-1.5" disabled={loading}>
-          {loading ? "Asking Gemini..." : intervals.length > 0 ? "Re-generate" : "✨ Generate schedule"}
+          {loading ? "Asking AI..." : intervals.length > 0 ? "Re-generate" : "✨ Generate schedule"}
         </button>
       </div>
 
@@ -66,7 +66,7 @@ export default function MaintenanceIntervals({ car, entries }) {
       {error && <p className="text-xs text-rose-400 mb-3">{error}</p>}
 
       {intervals.length === 0 ? (
-        loaded && !loading && <p className="text-sm text-slate-500">No schedule generated yet.</p>
+        loaded && !loading && <p className="text-sm text-stone-500">No schedule generated yet.</p>
       ) : (
         <div className="space-y-2">
           {intervals.map((interval) => {
@@ -75,23 +75,23 @@ export default function MaintenanceIntervals({ car, entries }) {
             return (
               <div
                 key={interval.id}
-                className="flex items-start justify-between gap-4 border-t border-slate-800 pt-2 first:border-t-0 first:pt-0"
+                className="flex items-start justify-between gap-4 border-t border-stone-800 pt-2 first:border-t-0 first:pt-0"
               >
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h4 className="font-medium text-slate-100 text-sm">{interval.part}</h4>
+                    <h4 className="font-medium text-stone-100 text-sm">{interval.part}</h4>
                     <span className={`text-[11px] px-1.5 py-0.5 rounded ${TONE_CLASSES[status.tone]}`}>
                       {status.label}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <p className="text-xs text-stone-500 mt-0.5">
                     Every {interval.interval_miles.toLocaleString()} mi
                     {interval.interval_months ? ` / ${interval.interval_months} mo` : ""}
                     {lastService
                       ? ` · last: "${lastService.service}"${lastService.mileage != null ? ` at ${lastService.mileage.toLocaleString()} mi` : ""}`
                       : " · not logged yet"}
                   </p>
-                  {interval.notes && <p className="text-xs text-slate-600 mt-0.5 italic">{interval.notes}</p>}
+                  {interval.notes && <p className="text-xs text-stone-600 mt-0.5 italic">{interval.notes}</p>}
                 </div>
               </div>
             );

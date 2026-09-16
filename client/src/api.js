@@ -65,4 +65,27 @@ export const api = {
   // Dyno graph (HP/torque curve)
   getDyno: (carId) => request(`/dyno/${carId}`),
   estimateDyno: (carId) => request(`/dyno/${carId}/estimate`, { method: "POST" }),
+
+  // Photos
+  getPhotos: (carId) => request(`/photos?car_id=${carId}`),
+  uploadPhoto: async (carId, file, caption) => {
+    const body = new FormData();
+    body.append("car_id", carId);
+    body.append("photo", file);
+    if (caption) body.append("caption", caption);
+
+    const res = await fetch(`${BASE}/photos`, { method: "POST", body });
+    if (!res.ok) {
+      let message = `Request failed (${res.status})`;
+      try {
+        const data = await res.json();
+        if (data.error) message = data.error;
+      } catch {
+        // ignore parse errors
+      }
+      throw new Error(message);
+    }
+    return res.json();
+  },
+  deletePhoto: (id) => request(`/photos/${id}`, { method: "DELETE" }),
 };

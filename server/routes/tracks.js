@@ -1,7 +1,7 @@
 const express = require("express");
 const db = require("../db");
 const { getCurrentOutput } = require("../carStats");
-const { estimateTrackTime } = require("../gemini");
+const { estimateTrackTime, cleanupEntryText } = require("../gemini");
 
 const router = express.Router();
 
@@ -25,17 +25,19 @@ router.post("/", async (req, res) => {
   if (!output) return res.status(404).json({ error: "Car not found" });
 
   try {
+    const cleaned = await cleanupEntryText({ track_name: track_name.trim() });
+
     const estimate = await estimateTrackTime({
       car: output.car,
       currentHp: output.currentHp,
       currentTorque: output.currentTorque,
-      trackName: track_name.trim(),
+      trackName: cleaned.track_name,
     });
 
     const stmt = db.prepare(
       "INSERT INTO track_times (car_id, track_name, lap_time, summary) VALUES (?, ?, ?, ?)"
     );
-    const info = stmt.run(car_id, track_name.trim(), estimate.lap_time, estimate.summary);
+    const info = stmt.run(car_id, cleaned.track_name, estimate.lap_time, estimate.summary);
     const track = db.prepare("SELECT * FROM track_times WHERE id = ?").get(info.lastInsertRowid);
     res.status(201).json(track);
   } catch (err) {
