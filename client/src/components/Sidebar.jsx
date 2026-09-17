@@ -1,3 +1,5 @@
+import Avatar from "./Avatar.jsx";
+
 export default function Sidebar({
   cars,
   selectedCarId,
@@ -5,6 +7,7 @@ export default function Sidebar({
   onSelectCar,
   onSelectDashboard,
   onSelectForums,
+  onSelectDiscover,
   onSelectAccount,
   onAddCar,
   currentUser,
@@ -50,6 +53,14 @@ export default function Sidebar({
         >
           💬 Forums
         </button>
+        <button
+          onClick={onSelectDiscover}
+          className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+            view === "discover" ? "bg-brand-600 text-white" : "text-stone-300 hover:bg-stone-800"
+          }`}
+        >
+          🔍 Discover
+        </button>
       </nav>
 
       <div className="px-4 pt-4 pb-2 flex items-center justify-between">
@@ -87,9 +98,7 @@ export default function Sidebar({
       >
         {currentUser ? (
           <>
-            <span className="text-xl w-8 h-8 flex items-center justify-center rounded-full bg-stone-800 shrink-0">
-              {currentUser.avatar || "🚗"}
-            </span>
+            <Avatar photo={currentUser.avatar_photo} emoji={currentUser.avatar} size="sm" />
             <span className="min-w-0">
               <span className="block text-sm font-medium text-stone-100 truncate">
                 {currentUser.display_name || currentUser.username}

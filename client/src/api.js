@@ -18,6 +18,27 @@ export function setToken(token) {
   }
 }
 
+async function requestFormData(path, formData) {
+  const token = getToken();
+  const res = await fetch(`${BASE}${path}`, {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+
+  if (!res.ok) {
+    let message = `Request failed (${res.status})`;
+    try {
+      const data = await res.json();
+      if (data.error) message = data.error;
+    } catch {
+      // ignore parse errors
+    }
+    throw new Error(message);
+  }
+  return res.json();
+}
+
 async function request(path, options = {}) {
   const token = getToken();
   const res = await fetch(`${BASE}${path}`, {
@@ -90,24 +111,12 @@ export const api = {
 
   // Photos
   getPhotos: (carId) => request(`/photos?car_id=${carId}`),
-  uploadPhoto: async (carId, file, caption) => {
+  uploadPhoto: (carId, file, caption) => {
     const body = new FormData();
     body.append("car_id", carId);
     body.append("photo", file);
     if (caption) body.append("caption", caption);
-
-    const res = await fetch(`${BASE}/photos`, { method: "POST", body });
-    if (!res.ok) {
-      let message = `Request failed (${res.status})`;
-      try {
-        const data = await res.json();
-        if (data.error) message = data.error;
-      } catch {
-        // ignore parse errors
-      }
-      throw new Error(message);
-    }
-    return res.json();
+    return requestFormData("/photos", body);
   },
   deletePhoto: (id) => request(`/photos/${id}`, { method: "DELETE" }),
 
@@ -122,6 +131,24 @@ export const api = {
   logout: () => request("/auth/logout", { method: "POST" }),
   getMe: () => request("/auth/me"),
   updateMe: (data) => request("/auth/me", { method: "PUT", body: JSON.stringify(data) }),
+  uploadAvatar: (file) => {
+    const body = new FormData();
+    body.append("photo", file);
+    return requestFormData("/auth/me/avatar", body);
+  },
+  removeAvatarPhoto: () => request("/auth/me/avatar", { method: "DELETE" }),
+  uploadBanner: (file) => {
+    const body = new FormData();
+    body.append("photo", file);
+    return requestFormData("/auth/me/banner", body);
+  },
+  removeBannerPhoto: () => request("/auth/me/banner", { method: "DELETE" }),
+
+  // Community directory (Discover)
+  getUsers: () => request("/users"),
+  getConnections: () => request("/connections"),
+  connectUser: (userId) => request("/connections", { method: "POST", body: JSON.stringify({ user_id: userId }) }),
+  disconnectUser: (userId) => request(`/connections/${userId}`, { method: "DELETE" }),
 
   // Social forums
   getForumThreads: () => request("/forums/threads"),

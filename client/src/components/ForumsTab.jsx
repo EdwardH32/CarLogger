@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../api.js";
+import Avatar from "./Avatar.jsx";
 
 const fmt = (iso) => new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 
@@ -94,11 +95,14 @@ export default function ForumsTab({ currentUser, onSelectThread, onGoToAccount }
               onClick={() => onSelectThread(t.id)}
               className="w-full text-left p-4 hover:bg-stone-900/60 transition-colors flex items-start justify-between gap-4"
             >
-              <div className="min-w-0">
-                <h4 className="font-medium text-stone-100 truncate">{t.title}</h4>
-                <p className="text-xs text-stone-500 mt-1">
-                  {t.avatar || "🚗"} {t.display_name || t.username} · {fmt(t.last_activity)}
-                </p>
+              <div className="min-w-0 flex items-start gap-2">
+                <Avatar photo={t.avatar_photo} emoji={t.avatar} size="xs" className="mt-0.5" />
+                <div className="min-w-0">
+                  <h4 className="font-medium text-stone-100 truncate">{t.title}</h4>
+                  <p className="text-xs text-stone-500 mt-1">
+                    {t.display_name || t.username} · {fmt(t.last_activity)}
+                  </p>
+                </div>
               </div>
               <span className="text-xs text-stone-500 shrink-0">
                 {t.reply_count} {t.reply_count === 1 ? "reply" : "replies"}

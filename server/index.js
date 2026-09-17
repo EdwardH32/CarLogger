@@ -18,6 +18,8 @@ const photosRouter = require("./routes/photos");
 const modRecommendationsRouter = require("./routes/modRecommendations");
 const authRouter = require("./routes/auth");
 const forumsRouter = require("./routes/forums");
+const usersRouter = require("./routes/users");
+const connectionsRouter = require("./routes/connections");
 const { attachUser } = require("./auth");
 
 const app = express();
@@ -43,6 +45,8 @@ app.use("/api/wear-parts", wearPartsRouter);
 app.use("/api/dyno", dynoRouter);
 app.use("/api/photos", photosRouter);
 app.use("/api/mod-recommendations", modRecommendationsRouter);
+app.use("/api/users", usersRouter);
+app.use("/api/connections", connectionsRouter);
 
 app.use((err, req, res, next) => {
   console.error(err);

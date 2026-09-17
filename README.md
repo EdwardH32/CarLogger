@@ -28,7 +28,8 @@ before you do any procedure in this manual.
 | 7 | Interface Control |
 | 8 | User Accounts |
 | 9 | Social Forums |
-| 10 | General Notes |
+| 10 | Discover |
+| 11 | General Notes |
 
 ## 1. GENERAL DESCRIPTION
 
@@ -185,12 +186,13 @@ carlogger/
 │   ├── db.js               SQLite connection and schema
 │   ├── gemini.js            Gemini API client
 │   ├── auth.js              Password hashing and session tokens
+│   ├── upload.js            Shared image upload configuration
 │   ├── carStats.js          Current horsepower/torque calculation
 │   └── routes/               cars, mods, modRecommendations,
 │                              maintenance, summary, performance,
 │                              tracks, maintenance-intervals,
 │                              wear-parts, dyno, photos, auth,
-│                              forums
+│                              forums, users, connections
 └── client/               React, Vite, and Tailwind frontend
     └── src/
         ├── api.js             Fetch wrapper for the backend
@@ -199,7 +201,8 @@ carlogger/
                                   ModsTab, ModRecommendations,
                                   MaintenanceTab, PerformanceTab,
                                   DynoTab, CarPhotos, AccountTab,
-                                  ForumsTab, ForumThreadDetail, ...
+                                  Avatar, ForumsTab,
+                                  ForumThreadDetail, Discover, ...
 ```
 
 ## 7. INTERFACE CONTROL
@@ -244,20 +247,29 @@ Table 7-1 lists the API endpoints for this software.
 | POST | `/api/auth/login` | Log in. Return an access token. |
 | POST | `/api/auth/logout` | End the current session. |
 | GET | `/api/auth/me` | Get the current logged-in user. |
-| PUT | `/api/auth/me` | Update the display name, avatar, or bio for the current user. |
+| PUT | `/api/auth/me` | Update the display name, avatar, bio, or location for the current user. |
+| POST | `/api/auth/me/avatar` | Upload a profile photo for the current user. Send the photo file. |
+| DELETE | `/api/auth/me/avatar` | Remove the profile photo for the current user. |
+| POST | `/api/auth/me/banner` | Upload a banner photo for the current user. Send the photo file. |
+| DELETE | `/api/auth/me/banner` | Remove the banner photo for the current user. |
 | GET | `/api/forums/threads` | List all forum threads. |
 | POST | `/api/forums/threads` | Create a forum thread. You must be logged in. |
 | GET | `/api/forums/threads/:id` | Get one forum thread and its replies. |
 | DELETE | `/api/forums/threads/:id` | Delete a forum thread. You must be the author. |
 | POST | `/api/forums/threads/:id/replies` | Add a reply to a forum thread. You must be logged in. |
 | DELETE | `/api/forums/replies/:id` | Delete a forum reply. You must be the author. |
+| GET | `/api/users` | List community members. This list excludes the current logged-in user. |
+| GET | `/api/connections` | List the connections for the current user. You must be logged in. |
+| POST | `/api/connections` | Connect with another user. Send the user ID. You must be logged in. |
+| DELETE | `/api/connections/:userId` | Remove a connection. You must be logged in. |
 
 ## 8. USER ACCOUNTS
 
 ### 8.1 Purpose
 
 A user account lets a person post in the forums. A user account also
-holds a profile: a display name, an avatar, and a bio.
+holds a profile: a display name, an emoji avatar or a photo, a banner
+photo, a location, and a bio.
 
 ### 8.2 Account Procedure
 
@@ -268,8 +280,14 @@ Do these steps to create an account and set up a profile:
 3. Enter a username, an email address, an optional display name, and
    a password. The password must be at least 6 characters.
 4. Select "Sign up" to submit the form. The app logs you in.
-5. Select "Edit profile" to change your avatar, display name, or bio.
-6. Select "Log out" to end your session on this device.
+5. Select "Edit profile" to change your profile.
+6. Select "Upload photo" to add a profile photo. Select "Upload
+   banner" to add a banner photo. Select "Remove" to remove a photo
+   you added. If you do not add a profile photo, the app shows your
+   emoji avatar instead.
+7. Enter a display name, a location, and a bio. Select "Save" to save
+   your changes.
+8. Select "Log out" to end your session on this device.
 
 > **NOTE**
 >
@@ -284,8 +302,13 @@ Do these steps to create an account and set up a profile:
 
 > **NOTE**
 >
-> The app corrects spelling and formatting errors in a display name
-> and a bio. The app uses Gemini to do this.
+> The app corrects spelling and formatting errors in a display name,
+> a location, and a bio. The app uses Gemini to do this.
+
+> **NOTE**
+>
+> A profile photo and a banner photo must be a JPEG, PNG, WebP, or GIF
+> file. Each file must be 10 MB or smaller.
 
 ## 9. SOCIAL FORUMS
 
@@ -313,7 +336,35 @@ Do these steps to use the forums:
 > The app corrects spelling and formatting errors in a thread title,
 > a thread post, and a reply. The app uses Gemini to do this.
 
-## 10. GENERAL NOTES
+## 10. DISCOVER
+
+### 10.1 Purpose
+
+The Discover page lets a user meet the other members of the CarLogger
+community, one at a time. A user can connect with a member to save
+that member for later.
+
+### 10.2 Discover Procedure
+
+Do these steps to use Discover:
+
+1. Open the Discover tab. The app shows one community member at a
+   time: their photo or avatar, their display name, their username,
+   and their bio. This step does not need a user account.
+2. Select "Pass" to skip the member. Select "Connect" to save the
+   member to your connections. You can also drag the card left to
+   pass or right to connect.
+3. Log in to connect with a member. If you are not logged in, select
+   "Connect" to view a message that tells you to log in.
+4. Select "Connections" to view your list of saved members.
+5. Select "Start over" after you reach the end of the list, to view
+   the list again from the start.
+
+> **NOTE**
+>
+> The Discover list excludes your own account.
+
+## 11. GENERAL NOTES
 
 > **NOTE**
 >

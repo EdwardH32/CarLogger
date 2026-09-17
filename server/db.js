@@ -146,6 +146,14 @@ db.exec(`
     body TEXT NOT NULL,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
+
+  CREATE TABLE IF NOT EXISTS connections (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    target_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE (user_id, target_user_id)
+  );
 `);
 
 // cars.mileage was added after the initial release — add it if this DB predates it.
@@ -155,6 +163,18 @@ if (!carColumns.includes("mileage")) {
 }
 if (!carColumns.includes("nickname")) {
   db.exec("ALTER TABLE cars ADD COLUMN nickname TEXT");
+}
+
+// location/avatar_photo/banner_photo were added after the initial release.
+const userColumns = db.prepare("PRAGMA table_info(users)").all().map((c) => c.name);
+if (!userColumns.includes("location")) {
+  db.exec("ALTER TABLE users ADD COLUMN location TEXT");
+}
+if (!userColumns.includes("avatar_photo")) {
+  db.exec("ALTER TABLE users ADD COLUMN avatar_photo TEXT");
+}
+if (!userColumns.includes("banner_photo")) {
+  db.exec("ALTER TABLE users ADD COLUMN banner_photo TEXT");
 }
 
 module.exports = db;

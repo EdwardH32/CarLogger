@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { api } from "../api.js";
+import Avatar from "./Avatar.jsx";
 
 const fmt = (iso) => new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 
-function PostCard({ author, avatar, createdAt, body, canDelete, onDelete }) {
+function PostCard({ author, avatar, avatarPhoto, createdAt, body, canDelete, onDelete }) {
   return (
     <div className="card p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2 text-sm">
-          <span className="text-lg">{avatar || "🚗"}</span>
+          <Avatar photo={avatarPhoto} emoji={avatar} size="xs" />
           <span className="font-medium text-stone-200">{author}</span>
           <span className="text-xs text-stone-500">{fmt(createdAt)}</span>
         </div>
@@ -84,6 +85,7 @@ export default function ForumThreadDetail({ threadId, currentUser, onBack, onDel
       <PostCard
         author={thread.display_name || thread.username}
         avatar={thread.avatar}
+        avatarPhoto={thread.avatar_photo}
         createdAt={thread.created_at}
         body={thread.body}
         canDelete={currentUser?.id === thread.user_id}
@@ -97,6 +99,7 @@ export default function ForumThreadDetail({ threadId, currentUser, onBack, onDel
               key={r.id}
               author={r.display_name || r.username}
               avatar={r.avatar}
+              avatarPhoto={r.avatar_photo}
               createdAt={r.created_at}
               body={r.body}
               canDelete={currentUser?.id === r.user_id}

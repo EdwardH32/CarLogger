@@ -1,7 +1,10 @@
 const express = require("express");
+const fs = require("fs");
+const path = require("path");
 const db = require("../db");
 const { hashPassword, verifyPassword, createSession, requireAuth } = require("../auth");
 const { cleanupEntryText } = require("../gemini");
+const { upload, uploadDir } = require("../upload");
 
 const router = express.Router();
 
@@ -13,9 +16,17 @@ function publicUser(u) {
     email: u.email,
     display_name: u.display_name,
     avatar: u.avatar,
+    avatar_photo: u.avatar_photo,
+    banner_photo: u.banner_photo,
     bio: u.bio,
+    location: u.location,
     created_at: u.created_at,
   };
+}
+
+function deletePhotoFile(filename) {
+  if (!filename) return;
+  fs.unlink(path.join(uploadDir, filename), () => {});
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -85,19 +96,59 @@ router.get("/me", (req, res) => {
 });
 
 router.put("/me", requireAuth, async (req, res) => {
-  const { display_name, avatar, bio } = req.body;
+  const { display_name, avatar, bio, location } = req.body;
   const cleaned = await cleanupEntryText({
     display_name: display_name != null ? String(display_name).trim() : undefined,
     bio: bio != null ? String(bio).trim() : undefined,
+    location: location != null ? String(location).trim() : undefined,
   });
 
-  db.prepare("UPDATE users SET display_name = ?, avatar = ?, bio = ? WHERE id = ?").run(
+  db.prepare("UPDATE users SET display_name = ?, avatar = ?, bio = ?, location = ? WHERE id = ?").run(
     display_name != null ? cleaned.display_name : req.user.display_name,
     avatar !== undefined ? avatar : req.user.avatar,
     bio != null ? cleaned.bio : req.user.bio,
+    location != null ? cleaned.location || null : req.user.location,
     req.user.id
   );
 
+  const user = db.prepare("SELECT * FROM users WHERE id = ?").get(req.user.id);
+  res.json({ user: publicUser(user) });
+});
+
+router.post("/me/avatar", requireAuth, (req, res) => {
+  upload.single("photo")(req, res, (err) => {
+    if (err) return res.status(400).json({ error: err.message });
+    if (!req.file) return res.status(400).json({ error: "photo file is required" });
+
+    deletePhotoFile(req.user.avatar_photo);
+    db.prepare("UPDATE users SET avatar_photo = ? WHERE id = ?").run(req.file.filename, req.user.id);
+    const user = db.prepare("SELECT * FROM users WHERE id = ?").get(req.user.id);
+    res.json({ user: publicUser(user) });
+  });
+});
+
+router.delete("/me/avatar", requireAuth, (req, res) => {
+  deletePhotoFile(req.user.avatar_photo);
+  db.prepare("UPDATE users SET avatar_photo = NULL WHERE id = ?").run(req.user.id);
+  const user = db.prepare("SELECT * FROM users WHERE id = ?").get(req.user.id);
+  res.json({ user: publicUser(user) });
+});
+
+router.post("/me/banner", requireAuth, (req, res) => {
+  upload.single("photo")(req, res, (err) => {
+    if (err) return res.status(400).json({ error: err.message });
+    if (!req.file) return res.status(400).json({ error: "photo file is required" });
+
+    deletePhotoFile(req.user.banner_photo);
+    db.prepare("UPDATE users SET banner_photo = ? WHERE id = ?").run(req.file.filename, req.user.id);
+    const user = db.prepare("SELECT * FROM users WHERE id = ?").get(req.user.id);
+    res.json({ user: publicUser(user) });
+  });
+});
+
+router.delete("/me/banner", requireAuth, (req, res) => {
+  deletePhotoFile(req.user.banner_photo);
+  db.prepare("UPDATE users SET banner_photo = NULL WHERE id = ?").run(req.user.id);
   const user = db.prepare("SELECT * FROM users WHERE id = ?").get(req.user.id);
   res.json({ user: publicUser(user) });
 });

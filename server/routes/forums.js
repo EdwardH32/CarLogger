@@ -6,13 +6,13 @@ const { cleanupEntryText } = require("../gemini");
 const router = express.Router();
 
 const THREAD_SELECT = `
-  SELECT t.id, t.title, t.body, t.created_at, u.id AS user_id, u.username, u.display_name, u.avatar
+  SELECT t.id, t.title, t.body, t.created_at, u.id AS user_id, u.username, u.display_name, u.avatar, u.avatar_photo
   FROM forum_threads t
   JOIN users u ON u.id = t.user_id
 `;
 
 const REPLY_SELECT = `
-  SELECT r.id, r.thread_id, r.body, r.created_at, u.id AS user_id, u.username, u.display_name, u.avatar
+  SELECT r.id, r.thread_id, r.body, r.created_at, u.id AS user_id, u.username, u.display_name, u.avatar, u.avatar_photo
   FROM forum_replies r
   JOIN users u ON u.id = r.user_id
 `;
@@ -20,7 +20,7 @@ const REPLY_SELECT = `
 router.get("/threads", (req, res) => {
   const threads = db
     .prepare(
-      `SELECT t.id, t.title, t.created_at, u.username, u.display_name, u.avatar,
+      `SELECT t.id, t.title, t.created_at, u.username, u.display_name, u.avatar, u.avatar_photo,
          (SELECT COUNT(*) FROM forum_replies r WHERE r.thread_id = t.id) AS reply_count,
          COALESCE(
            (SELECT MAX(r2.created_at) FROM forum_replies r2 WHERE r2.thread_id = t.id),

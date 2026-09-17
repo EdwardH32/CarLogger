@@ -7,10 +7,11 @@ import AddCarModal from "./components/AddCarModal.jsx";
 import AccountTab from "./components/AccountTab.jsx";
 import ForumsTab from "./components/ForumsTab.jsx";
 import ForumThreadDetail from "./components/ForumThreadDetail.jsx";
+import Discover from "./components/Discover.jsx";
 
 export default function App() {
   const [cars, setCars] = useState([]);
-  const [view, setView] = useState("dashboard"); // "dashboard" | "car" | "account" | "forums" | "forum-thread"
+  const [view, setView] = useState("dashboard"); // "dashboard" | "car" | "account" | "forums" | "forum-thread" | "discover"
   const [selectedCarId, setSelectedCarId] = useState(null);
   const [selectedThreadId, setSelectedThreadId] = useState(null);
   const [showAddCar, setShowAddCar] = useState(false);
@@ -57,6 +58,11 @@ export default function App() {
 
   const goToForums = () => {
     setView("forums");
+    setMobileNavOpen(false);
+  };
+
+  const goToDiscover = () => {
+    setView("discover");
     setMobileNavOpen(false);
   };
 
@@ -124,6 +130,7 @@ export default function App() {
         onSelectCar={selectCar}
         onSelectDashboard={selectDashboard}
         onSelectForums={goToForums}
+        onSelectDiscover={goToDiscover}
         onSelectAccount={goToAccount}
         onAddCar={() => setShowAddCar(true)}
         currentUser={currentUser}
@@ -152,6 +159,8 @@ export default function App() {
         {view === "forums" && (
           <ForumsTab currentUser={currentUser} onSelectThread={selectThread} onGoToAccount={goToAccount} />
         )}
+
+        {view === "discover" && <Discover currentUser={currentUser} onGoToAccount={goToAccount} />}
 
         {view === "forum-thread" && selectedThreadId && (
           <ForumThreadDetail

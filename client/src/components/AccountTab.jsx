@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { api, setToken } from "../api.js";
+import Avatar from "./Avatar.jsx";
 
 const AVATAR_CHOICES = ["🚗", "🏎️", "🛻", "🚙", "🔧", "🏁", "⚙️", "💨"];
 
@@ -142,12 +143,26 @@ function RegisterForm({ onSwitch, onAuthed }) {
 
 function ProfileView({ user, onUpdated, onLogout }) {
   const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState({ display_name: user.display_name || "", avatar: user.avatar || "🚗", bio: user.bio || "" });
+  const [form, setForm] = useState({
+    display_name: user.display_name || "",
+    avatar: user.avatar || "🚗",
+    bio: user.bio || "",
+    location: user.location || "",
+  });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
+  const avatarInputRef = useRef(null);
+  const bannerInputRef = useRef(null);
 
   const startEdit = () => {
-    setForm({ display_name: user.display_name || "", avatar: user.avatar || "🚗", bio: user.bio || "" });
+    setForm({
+      display_name: user.display_name || "",
+      avatar: user.avatar || "🚗",
+      bio: user.bio || "",
+      location: user.location || "",
+    });
     setError("");
     setEditing(true);
   };
@@ -176,13 +191,113 @@ function ProfileView({ user, onUpdated, onLogout }) {
     onLogout();
   };
 
+  const pickAvatarFile = () => avatarInputRef.current?.click();
+  const pickBannerFile = () => bannerInputRef.current?.click();
+
+  const onAvatarFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingAvatar(true);
+    setError("");
+    try {
+      const { user: updated } = await api.uploadAvatar(file);
+      onUpdated(updated);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setUploadingAvatar(false);
+      e.target.value = "";
+    }
+  };
+
+  const onBannerFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingBanner(true);
+    setError("");
+    try {
+      const { user: updated } = await api.uploadBanner(file);
+      onUpdated(updated);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setUploadingBanner(false);
+      e.target.value = "";
+    }
+  };
+
+  const removeAvatarPhoto = async () => {
+    const { user: updated } = await api.removeAvatarPhoto();
+    onUpdated(updated);
+  };
+
+  const removeBannerPhoto = async () => {
+    const { user: updated } = await api.removeBannerPhoto();
+    onUpdated(updated);
+  };
+
+  const hiddenFileInputs = (
+    <>
+      <input
+        ref={avatarInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/gif"
+        className="hidden"
+        onChange={onAvatarFileChange}
+      />
+      <input
+        ref={bannerInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/gif"
+        className="hidden"
+        onChange={onBannerFileChange}
+      />
+    </>
+  );
+
   if (editing) {
     return (
-      <form onSubmit={save} className="card p-4 space-y-3 max-w-sm">
+      <form onSubmit={save} className="card p-4 space-y-4 max-w-sm">
         <h3 className="text-sm font-semibold text-stone-300">Edit profile</h3>
+
+        {hiddenFileInputs}
+
         <div>
-          <label className="label">Avatar</label>
-          <div className="flex flex-wrap gap-2">
+          <label className="label">Banner</label>
+          <div className="h-20 rounded-lg bg-stone-950 border border-stone-800 overflow-hidden relative">
+            {user.banner_photo && (
+              <img src={`/uploads/${user.banner_photo}`} alt="Banner" className="w-full h-full object-cover" />
+            )}
+          </div>
+          <div className="flex gap-2 mt-2">
+            <button type="button" onClick={pickBannerFile} className="btn-secondary text-xs px-3 py-1.5" disabled={uploadingBanner}>
+              {uploadingBanner ? "Uploading..." : "Upload banner"}
+            </button>
+            {user.banner_photo && (
+              <button type="button" onClick={removeBannerPhoto} className="btn-ghost text-xs px-3 py-1.5">
+                Remove
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <label className="label">Photo</label>
+          <div className="flex items-center gap-3">
+            <Avatar photo={user.avatar_photo} emoji={form.avatar} size="lg" />
+            <div className="flex gap-2">
+              <button type="button" onClick={pickAvatarFile} className="btn-secondary text-xs px-3 py-1.5" disabled={uploadingAvatar}>
+                {uploadingAvatar ? "Uploading..." : "Upload photo"}
+              </button>
+              {user.avatar_photo && (
+                <button type="button" onClick={removeAvatarPhoto} className="btn-ghost text-xs px-3 py-1.5">
+                  Remove
+                </button>
+              )}
+            </div>
+          </div>
+          <p className="text-xs text-stone-500 mt-2">Or pick an emoji, used when there's no photo:</p>
+          <div className="flex flex-wrap gap-2 mt-2">
             {AVATAR_CHOICES.map((a) => (
               <button
                 type="button"
@@ -203,6 +318,15 @@ function ProfileView({ user, onUpdated, onLogout }) {
             className="input"
             value={form.display_name}
             onChange={(e) => setForm({ ...form, display_name: e.target.value })}
+          />
+        </div>
+        <div>
+          <label className="label">Location</label>
+          <input
+            className="input"
+            value={form.location}
+            onChange={(e) => setForm({ ...form, location: e.target.value })}
+            placeholder="e.g. Portland, OR"
           />
         </div>
         <div>
@@ -229,24 +353,28 @@ function ProfileView({ user, onUpdated, onLogout }) {
   }
 
   return (
-    <div className="card p-4 max-w-sm space-y-4">
-      <div className="flex items-center gap-3">
-        <span className="text-3xl w-14 h-14 flex items-center justify-center rounded-full bg-stone-800">
-          {user.avatar || "🚗"}
-        </span>
+    <div className="card max-w-sm overflow-hidden">
+      <div className="h-24 bg-stone-950">
+        {user.banner_photo && (
+          <img src={`/uploads/${user.banner_photo}`} alt="Banner" className="w-full h-full object-cover" />
+        )}
+      </div>
+      <div className="p-4 pt-0 space-y-4">
+        <Avatar photo={user.avatar_photo} emoji={user.avatar} size="xl" className="-mt-10 border-4 border-stone-950" />
         <div className="min-w-0">
           <h3 className="font-semibold text-stone-100 truncate">{user.display_name || user.username}</h3>
           <p className="text-xs text-stone-500">@{user.username}</p>
+          {user.location && <p className="text-xs text-stone-500 mt-1">{user.location}</p>}
         </div>
-      </div>
-      {user.bio && <p className="text-sm text-stone-400">{user.bio}</p>}
-      <div className="flex gap-2 pt-1">
-        <button onClick={startEdit} className="btn-secondary text-sm">
-          Edit profile
-        </button>
-        <button onClick={logout} className="btn-danger text-sm">
-          Log out
-        </button>
+        {user.bio && <p className="text-sm text-stone-400">{user.bio}</p>}
+        <div className="flex gap-2 pt-1">
+          <button onClick={startEdit} className="btn-secondary text-sm">
+            Edit profile
+          </button>
+          <button onClick={logout} className="btn-danger text-sm">
+            Log out
+          </button>
+        </div>
       </div>
     </div>
   );

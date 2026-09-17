@@ -34,7 +34,9 @@ function getUserByToken(token) {
     return null;
   }
   return db
-    .prepare("SELECT id, username, email, display_name, avatar, bio, created_at FROM users WHERE id = ?")
+    .prepare(
+      "SELECT id, username, email, display_name, avatar, avatar_photo, banner_photo, bio, location, created_at FROM users WHERE id = ?"
+    )
     .get(session.user_id);
 }
 
