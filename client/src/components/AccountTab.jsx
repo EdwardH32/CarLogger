@@ -29,7 +29,7 @@ function LoginForm({ onSwitch, onAuthed }) {
     <form onSubmit={submit} className="card p-4 space-y-3 max-w-sm">
       <h3 className="text-sm font-semibold text-stone-300">Log in</h3>
       <div>
-        <label className="label">Username</label>
+        <label className="label">Username or email</label>
         <input className="input" value={form.username} onChange={update("username")} autoComplete="username" />
       </div>
       <div>
@@ -55,8 +55,10 @@ function LoginForm({ onSwitch, onAuthed }) {
   );
 }
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 function RegisterForm({ onSwitch, onAuthed }) {
-  const [form, setForm] = useState({ username: "", password: "", display_name: "" });
+  const [form, setForm] = useState({ username: "", email: "", password: "", display_name: "" });
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -65,8 +67,12 @@ function RegisterForm({ onSwitch, onAuthed }) {
   const submit = async (e) => {
     e.preventDefault();
     setError("");
-    if (!form.username.trim() || !form.password) {
-      setError("Username and password are required.");
+    if (!form.username.trim() || !form.email.trim() || !form.password) {
+      setError("Username, email, and password are required.");
+      return;
+    }
+    if (!EMAIL_RE.test(form.email.trim())) {
+      setError("Enter a valid email address.");
       return;
     }
     setSaving(true);
@@ -94,6 +100,17 @@ function RegisterForm({ onSwitch, onAuthed }) {
           autoComplete="username"
         />
         <p className="text-xs text-stone-500 mt-1">3-20 characters: letters, numbers, underscore.</p>
+      </div>
+      <div>
+        <label className="label">Email</label>
+        <input
+          className="input"
+          type="email"
+          value={form.email}
+          onChange={update("email")}
+          placeholder="you@example.com"
+          autoComplete="email"
+        />
       </div>
       <div>
         <label className="label">Display name (optional)</label>

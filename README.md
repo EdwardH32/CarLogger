@@ -265,11 +265,16 @@ Do these steps to create an account and set up a profile:
 
 1. Open the Account tab.
 2. Select "Sign up".
-3. Enter a username, an optional display name, and a password. The
-   password must be at least 6 characters.
+3. Enter a username, an email address, an optional display name, and
+   a password. The password must be at least 6 characters.
 4. Select "Sign up" to submit the form. The app logs you in.
 5. Select "Edit profile" to change your avatar, display name, or bio.
 6. Select "Log out" to end your session on this device.
+
+> **NOTE**
+>
+> A username and an email address must each be unique. You can log in
+> with either one.
 
 > **NOTE**
 >

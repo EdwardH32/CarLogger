@@ -18,10 +18,12 @@ function publicUser(u) {
   };
 }
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 router.post("/register", async (req, res) => {
   const { username, email, password, display_name } = req.body;
-  if (!username || !password) {
-    return res.status(400).json({ error: "username and password are required" });
+  if (!username || !email || !password) {
+    return res.status(400).json({ error: "username, email, and password are required" });
   }
   if (password.length < 6) {
     return res.status(400).json({ error: "Password must be at least 6 characters" });
@@ -32,20 +34,23 @@ router.post("/register", async (req, res) => {
     return res.status(400).json({ error: "Username must be 3-20 characters: letters, numbers, underscore" });
   }
 
-  const existing = db.prepare("SELECT id FROM users WHERE username = ?").get(cleanUsername);
-  if (existing) return res.status(409).json({ error: "That username is already taken" });
+  const cleanEmail = email.trim().toLowerCase();
+  if (!EMAIL_RE.test(cleanEmail)) {
+    return res.status(400).json({ error: "Enter a valid email address" });
+  }
+
+  const existingUsername = db.prepare("SELECT id FROM users WHERE username = ?").get(cleanUsername);
+  if (existingUsername) return res.status(409).json({ error: "That username is already taken" });
+
+  const existingEmail = db.prepare("SELECT id FROM users WHERE email = ?").get(cleanEmail);
+  if (existingEmail) return res.status(409).json({ error: "That email is already registered" });
 
   const cleaned = await cleanupEntryText({ display_name: (display_name || username).trim() });
 
   const stmt = db.prepare(
     "INSERT INTO users (username, email, password_hash, display_name) VALUES (?, ?, ?, ?)"
   );
-  const info = stmt.run(
-    cleanUsername,
-    email ? email.trim().toLowerCase() : null,
-    hashPassword(password),
-    cleaned.display_name
-  );
+  const info = stmt.run(cleanUsername, cleanEmail, hashPassword(password), cleaned.display_name);
 
   const user = db.prepare("SELECT * FROM users WHERE id = ?").get(info.lastInsertRowid);
   const token = createSession(user.id);
@@ -55,12 +60,15 @@ router.post("/register", async (req, res) => {
 router.post("/login", (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) {
-    return res.status(400).json({ error: "username and password are required" });
+    return res.status(400).json({ error: "username (or email) and password are required" });
   }
 
-  const user = db.prepare("SELECT * FROM users WHERE username = ?").get(username.trim().toLowerCase());
+  const identifier = username.trim().toLowerCase();
+  const user = db
+    .prepare("SELECT * FROM users WHERE username = ? OR email = ?")
+    .get(identifier, identifier);
   if (!user || !verifyPassword(password, user.password_hash)) {
-    return res.status(401).json({ error: "Incorrect username or password" });
+    return res.status(401).json({ error: "Incorrect username, email, or password" });
   }
 
   const token = createSession(user.id);
