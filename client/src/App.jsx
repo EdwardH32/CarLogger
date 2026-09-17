@@ -1,18 +1,23 @@
 import { useEffect, useState } from "react";
-import { api } from "./api.js";
+import { api, getToken, setToken } from "./api.js";
 import Sidebar from "./components/Sidebar.jsx";
 import Dashboard from "./components/Dashboard.jsx";
 import CarDetail from "./components/CarDetail.jsx";
 import AddCarModal from "./components/AddCarModal.jsx";
+import AccountTab from "./components/AccountTab.jsx";
+import ForumsTab from "./components/ForumsTab.jsx";
+import ForumThreadDetail from "./components/ForumThreadDetail.jsx";
 
 export default function App() {
   const [cars, setCars] = useState([]);
-  const [view, setView] = useState("dashboard"); // "dashboard" | "car"
+  const [view, setView] = useState("dashboard"); // "dashboard" | "car" | "account" | "forums" | "forum-thread"
   const [selectedCarId, setSelectedCarId] = useState(null);
+  const [selectedThreadId, setSelectedThreadId] = useState(null);
   const [showAddCar, setShowAddCar] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [loadError, setLoadError] = useState("");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
 
   const loadCars = () =>
     api
@@ -23,6 +28,14 @@ export default function App() {
   useEffect(() => {
     loadCars();
   }, [refreshKey]);
+
+  useEffect(() => {
+    if (!getToken()) return;
+    api
+      .getMe()
+      .then(({ user }) => setCurrentUser(user))
+      .catch(() => setToken(null));
+  }, []);
 
   const bump = () => setRefreshKey((k) => k + 1);
 
@@ -35,6 +48,32 @@ export default function App() {
   const selectDashboard = () => {
     setView("dashboard");
     setMobileNavOpen(false);
+  };
+
+  const goToAccount = () => {
+    setView("account");
+    setMobileNavOpen(false);
+  };
+
+  const goToForums = () => {
+    setView("forums");
+    setMobileNavOpen(false);
+  };
+
+  const selectThread = (id) => {
+    setSelectedThreadId(id);
+    setView("forum-thread");
+    setMobileNavOpen(false);
+  };
+
+  const handleAuthed = (user) => {
+    setCurrentUser(user);
+    setView("forums");
+  };
+
+  const handleLogout = () => {
+    setToken(null);
+    setCurrentUser(null);
   };
 
   const handleCreateCar = async (payload) => {
@@ -84,7 +123,10 @@ export default function App() {
         view={view}
         onSelectCar={selectCar}
         onSelectDashboard={selectDashboard}
+        onSelectForums={goToForums}
+        onSelectAccount={goToAccount}
         onAddCar={() => setShowAddCar(true)}
+        currentUser={currentUser}
         isOpen={mobileNavOpen}
         onClose={() => setMobileNavOpen(false)}
       />
@@ -96,6 +138,29 @@ export default function App() {
 
         {view === "car" && selectedCarId && (
           <CarDetail carId={selectedCarId} onDeleted={handleCarDeleted} notifyChange={bump} />
+        )}
+
+        {view === "account" && (
+          <AccountTab
+            currentUser={currentUser}
+            onAuthed={handleAuthed}
+            onUpdated={setCurrentUser}
+            onLogout={handleLogout}
+          />
+        )}
+
+        {view === "forums" && (
+          <ForumsTab currentUser={currentUser} onSelectThread={selectThread} onGoToAccount={goToAccount} />
+        )}
+
+        {view === "forum-thread" && selectedThreadId && (
+          <ForumThreadDetail
+            threadId={selectedThreadId}
+            currentUser={currentUser}
+            onBack={goToForums}
+            onDeleted={goToForums}
+            onGoToAccount={goToAccount}
+          />
         )}
       </main>
 

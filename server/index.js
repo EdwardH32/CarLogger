@@ -16,6 +16,9 @@ const wearPartsRouter = require("./routes/wearParts");
 const dynoRouter = require("./routes/dyno");
 const photosRouter = require("./routes/photos");
 const modRecommendationsRouter = require("./routes/modRecommendations");
+const authRouter = require("./routes/auth");
+const forumsRouter = require("./routes/forums");
+const { attachUser } = require("./auth");
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -23,9 +26,12 @@ const PORT = process.env.PORT || 4000;
 app.use(cors());
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "data", "uploads")));
+app.use(attachUser);
 
 app.get("/api/health", (req, res) => res.json({ ok: true }));
 
+app.use("/api/auth", authRouter);
+app.use("/api/forums", forumsRouter);
 app.use("/api/cars", carsRouter);
 app.use("/api/mods", modsRouter);
 app.use("/api/maintenance", maintenanceRouter);

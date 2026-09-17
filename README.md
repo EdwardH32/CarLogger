@@ -26,7 +26,9 @@ before you do any procedure in this manual.
 | 5 | Data Storage |
 | 6 | Software Architecture |
 | 7 | Interface Control |
-| 8 | General Notes |
+| 8 | User Accounts |
+| 9 | Social Forums |
+| 10 | General Notes |
 
 ## 1. GENERAL DESCRIPTION
 
@@ -161,11 +163,14 @@ run.
 
 The app stores photo files in the folder `server/data/uploads`.
 
+The SQLite file holds every user account. This includes a hashed
+password and active session tokens for each user.
+
 > **CAUTION**
 >
 > Do not commit the file `server/data/carlogger.db` to git. Do not
 > commit the folder `server/data/uploads` to git. These files contain
-> private data.
+> private data, including hashed passwords and session tokens.
 
 ## 6. SOFTWARE ARCHITECTURE
 
@@ -179,11 +184,13 @@ carlogger/
 │   ├── index.js           App entry point
 │   ├── db.js               SQLite connection and schema
 │   ├── gemini.js            Gemini API client
+│   ├── auth.js              Password hashing and session tokens
 │   ├── carStats.js          Current horsepower/torque calculation
 │   └── routes/               cars, mods, modRecommendations,
 │                              maintenance, summary, performance,
 │                              tracks, maintenance-intervals,
-│                              wear-parts, dyno, photos
+│                              wear-parts, dyno, photos, auth,
+│                              forums
 └── client/               React, Vite, and Tailwind frontend
     └── src/
         ├── api.js             Fetch wrapper for the backend
@@ -191,7 +198,8 @@ carlogger/
         └── components/         Sidebar, Dashboard, CarDetail,
                                   ModsTab, ModRecommendations,
                                   MaintenanceTab, PerformanceTab,
-                                  DynoTab, CarPhotos, ...
+                                  DynoTab, CarPhotos, AccountTab,
+                                  ForumsTab, ForumThreadDetail, ...
 ```
 
 ## 7. INTERFACE CONTROL
@@ -232,8 +240,75 @@ Table 7-1 lists the API endpoints for this software.
 | DELETE | `/api/photos/:id` | Delete a photo. |
 | GET | `/api/mod-recommendations?car_id=` | List common mod recommendations for a car. |
 | POST | `/api/mod-recommendations/:carId/generate` | Get an AI-generated list of common mod recommendations for a car. |
+| POST | `/api/auth/register` | Create a user account. Return an access token. |
+| POST | `/api/auth/login` | Log in. Return an access token. |
+| POST | `/api/auth/logout` | End the current session. |
+| GET | `/api/auth/me` | Get the current logged-in user. |
+| PUT | `/api/auth/me` | Update the display name, avatar, or bio for the current user. |
+| GET | `/api/forums/threads` | List all forum threads. |
+| POST | `/api/forums/threads` | Create a forum thread. You must be logged in. |
+| GET | `/api/forums/threads/:id` | Get one forum thread and its replies. |
+| DELETE | `/api/forums/threads/:id` | Delete a forum thread. You must be the author. |
+| POST | `/api/forums/threads/:id/replies` | Add a reply to a forum thread. You must be logged in. |
+| DELETE | `/api/forums/replies/:id` | Delete a forum reply. You must be the author. |
 
-## 8. GENERAL NOTES
+## 8. USER ACCOUNTS
+
+### 8.1 Purpose
+
+A user account lets a person post in the forums. A user account also
+holds a profile: a display name, an avatar, and a bio.
+
+### 8.2 Account Procedure
+
+Do these steps to create an account and set up a profile:
+
+1. Open the Account tab.
+2. Select "Sign up".
+3. Enter a username, an optional display name, and a password. The
+   password must be at least 6 characters.
+4. Select "Sign up" to submit the form. The app logs you in.
+5. Select "Edit profile" to change your avatar, display name, or bio.
+6. Select "Log out" to end your session on this device.
+
+> **NOTE**
+>
+> The app stores your access token on this device only. The app sends
+> this token with each request, so the app can identify you without
+> asking for your password again.
+
+> **NOTE**
+>
+> The app corrects spelling and formatting errors in a display name
+> and a bio. The app uses Gemini to do this.
+
+## 9. SOCIAL FORUMS
+
+### 9.1 Purpose
+
+The forums are a shared space for build threads, questions, and
+comparisons between users.
+
+### 9.2 Forum Procedure
+
+Do these steps to use the forums:
+
+1. Open the Forums tab. View the list of threads. A thread shows its
+   title, its author, and its reply count. This step does not need a
+   user account.
+2. Select a thread to view the full post and its replies.
+3. Log in to post. Select "New thread" to start a thread. Enter a
+   title and a post. Select "Post thread" to submit it.
+4. Log in to reply. Open a thread. Enter a reply. Select "Post reply"
+   to submit it.
+5. Select "Delete" on your own thread or your own reply to remove it.
+
+> **NOTE**
+>
+> The app corrects spelling and formatting errors in a thread title,
+> a thread post, and a reply. The app uses Gemini to do this.
+
+## 10. GENERAL NOTES
 
 > **NOTE**
 >

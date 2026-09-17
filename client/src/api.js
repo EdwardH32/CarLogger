@@ -1,8 +1,30 @@
 const BASE = "/api";
+const TOKEN_KEY = "carlogger_token";
+
+export function getToken() {
+  try {
+    return localStorage.getItem(TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function setToken(token) {
+  try {
+    if (token) localStorage.setItem(TOKEN_KEY, token);
+    else localStorage.removeItem(TOKEN_KEY);
+  } catch {
+    // ignore storage errors (e.g. private browsing)
+  }
+}
 
 async function request(path, options = {}) {
+  const token = getToken();
   const res = await fetch(`${BASE}${path}`, {
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
     ...options,
   });
 
@@ -93,4 +115,20 @@ export const api = {
   getModRecommendations: (carId) => request(`/mod-recommendations?car_id=${carId}`),
   generateModRecommendations: (carId) =>
     request(`/mod-recommendations/${carId}/generate`, { method: "POST" }),
+
+  // Account
+  register: (data) => request("/auth/register", { method: "POST", body: JSON.stringify(data) }),
+  login: (data) => request("/auth/login", { method: "POST", body: JSON.stringify(data) }),
+  logout: () => request("/auth/logout", { method: "POST" }),
+  getMe: () => request("/auth/me"),
+  updateMe: (data) => request("/auth/me", { method: "PUT", body: JSON.stringify(data) }),
+
+  // Social forums
+  getForumThreads: () => request("/forums/threads"),
+  createForumThread: (data) => request("/forums/threads", { method: "POST", body: JSON.stringify(data) }),
+  getForumThread: (id) => request(`/forums/threads/${id}`),
+  deleteForumThread: (id) => request(`/forums/threads/${id}`, { method: "DELETE" }),
+  createForumReply: (threadId, data) =>
+    request(`/forums/threads/${threadId}/replies`, { method: "POST", body: JSON.stringify(data) }),
+  deleteForumReply: (id) => request(`/forums/replies/${id}`, { method: "DELETE" }),
 };

@@ -4,7 +4,10 @@ export default function Sidebar({
   view,
   onSelectCar,
   onSelectDashboard,
+  onSelectForums,
+  onSelectAccount,
   onAddCar,
+  currentUser,
   isOpen,
   onClose,
 }) {
@@ -28,7 +31,7 @@ export default function Sidebar({
         </button>
       </div>
 
-      <nav className="p-2">
+      <nav className="p-2 space-y-1">
         <button
           onClick={onSelectDashboard}
           className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
@@ -36,6 +39,16 @@ export default function Sidebar({
           }`}
         >
           📊 Dashboard
+        </button>
+        <button
+          onClick={onSelectForums}
+          className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+            view === "forums" || view === "forum-thread"
+              ? "bg-brand-600 text-white"
+              : "text-stone-300 hover:bg-stone-800"
+          }`}
+        >
+          💬 Forums
         </button>
       </nav>
 
@@ -65,6 +78,29 @@ export default function Sidebar({
           </button>
         ))}
       </div>
+
+      <button
+        onClick={onSelectAccount}
+        className={`p-3 border-t border-stone-800 flex items-center gap-2 text-left transition-colors ${
+          view === "account" ? "bg-stone-800" : "hover:bg-stone-900"
+        }`}
+      >
+        {currentUser ? (
+          <>
+            <span className="text-xl w-8 h-8 flex items-center justify-center rounded-full bg-stone-800 shrink-0">
+              {currentUser.avatar || "🚗"}
+            </span>
+            <span className="min-w-0">
+              <span className="block text-sm font-medium text-stone-100 truncate">
+                {currentUser.display_name || currentUser.username}
+              </span>
+              <span className="block text-xs text-stone-500 truncate">@{currentUser.username}</span>
+            </span>
+          </>
+        ) : (
+          <span className="text-sm text-stone-400">👤 Log in / Sign up</span>
+        )}
+      </button>
     </aside>
   );
 }
